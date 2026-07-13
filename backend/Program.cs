@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Configuration;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -9,13 +10,18 @@ using System;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Read configuration from appsettings.json
+var config = builder.Configuration;
+var museApiKey = config["ApiSettings:MuseApiKey"] ?? "e267525eb7f40f0bdee9a81184697d495998da702a5742cc233667e688e74212";
+var frontendOrigin = config["ApiSettings:FrontendOrigin"] ?? "http://localhost:8080";
+
 // Add services
 builder.Services.AddHttpClient();
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll", policy =>
+    options.AddPolicy("FrontendPolicy", policy =>
     {
-        policy.AllowAnyOrigin()
+        policy.WithOrigins(frontendOrigin, "http://127.0.0.1:8080")
               .AllowAnyMethod()
               .AllowAnyHeader();
     });
@@ -23,10 +29,10 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-app.UseCors("AllowAll");
+app.UseCors("FrontendPolicy");
 
-// API Configuration Constants
-const string ApiKey = "e267525eb7f40f0bdee9a81184697d495998da702a5742cc233667e688e74212";
+// API key from configuration
+string ApiKey = museApiKey;
 
 // Hardcoded Fallbacks in case The Muse API is down or rate-limited
 var fallbackOpportunities = new[]
