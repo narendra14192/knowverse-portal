@@ -1,15 +1,15 @@
 # Knowverse Portal: Dynamic Opportunities Hub & Mini-Games
 
-Welcome to the **Knowverse Portal**! This is a state-of-the-art, feature-rich student dashboard built with a dual-backend architecture. It connects early-career job search opportunities, student ambassador programs, live internship listings, and stress-relieving mini-games in a unified, space-dark user interface.
+Welcome to the **Knowverse Portal**! This is a state-of-the-art, feature-rich student dashboard built with a resilient, high-availability architecture. It connects early-career job search opportunities, student ambassador programs, live internship listings, and stress-relieving mini-games in a unified, space-dark user interface.
 
 ---
 
 ## 🌟 Key Features
 
-### 1. Dual-Backend Architecture
-- **API Gateway (C# / ASP.NET Core Web API)**: Serves as the primary entry point for the client application. It manages routing, processes cross-origin policies (CORS), and acts as a high-availability controller.
-- **Microservice (Python / Flask)**: A dedicated scraper and data collector microservice that compiles internship opportunities from portals.
-- **Fail-Safe High Availability**: If the Flask microservice is offline, the C# Gateway automatically falls back to an integrated, built-in memory cache database, guaranteeing zero downtime.
+### 1. High-Availability Backend Gateway (C#)
+- **API Gateway (C# / ASP.NET Core Web API)**: Serves as the primary entry point for the client application. It manages routing, processes cross-origin policies (CORS), and connects to The Muse REST API.
+- **Fail-Safe Client-Side Pipeline**: If the local C# API Gateway is blocked or offline (e.g. because of Windows Defender Application Control policies), the frontend client automatically fails over to query The Muse REST API directly using client-side async fetch routines.
+- **Resilient Fallback Database**: If all network fetches fail, the portal loads curated high-availability cache records (Microsoft, TCS, Amazon, Deloitte, Nova Robotics, Cloudzapier, and Accenture) locally.
 
 ### 2. Premium Space-Dark Design ("Aura Dusk")
 - Built with a sleek HSL color scheme featuring custom neon borders, glowing backdrop filters (`glassmorphic`), and animated background ambient orbs that follow subtle translation paths.
@@ -28,8 +28,8 @@ Welcome to the **Knowverse Portal**! This is a state-of-the-art, feature-rich st
 
 ## 🛠️ Technology Stack
 - **Frontend**: HTML5, Vanilla CSS3 (Custom Grid/Flexbox), JavaScript (ES6+), Lucide Icons
-- **Primary Backend API**: .NET 10.0 (ASP.NET Core Web API)
-- **Scraper Microservice**: Python 3.9+ / Flask / Flask-CORS
+- **Backend API**: .NET 10.0 (ASP.NET Core Web API)
+- **REST Integrations**: The Muse Developer API v2
 
 ---
 
@@ -38,7 +38,6 @@ Welcome to the **Knowverse Portal**! This is a state-of-the-art, feature-rich st
 ### Prerequisites
 - **Git** installed on your local environment.
 - **.NET 10 SDK** (for C# API).
-- **Python 3.9+** (for Flask scraper).
 
 ### Installation & Run
 
@@ -48,23 +47,14 @@ git clone <your-repository-url>
 cd "insta link page"
 ```
 
-#### 2. Run the Python Flask Microservice
-```bash
-cd microservice
-pip install -r requirements.txt
-python app.py
-```
-*The Flask microservice will start listening on `http://127.0.0.1:5000`.*
-
-#### 3. Run the C# API Gateway
-In a new terminal window:
+#### 2. Run the C# API Gateway
 ```bash
 cd backend
 dotnet run
 ```
 *The C# API Gateway will start listening on `http://127.0.0.1:5200`.*
 
-#### 4. Load the Web App
+#### 3. Load the Web App
 Open `index.html` directly in your browser, or host it using a static file server (e.g. Live Server extension in VS Code, or using Node.js) on port `8080`.
 
 ---
@@ -72,10 +62,6 @@ Open `index.html` directly in your browser, or host it using a static file serve
 ## 📐 API Endpoint Specifications
 
 ### C# API Gateway (Port 5200)
-- `GET /api/opportunities`: Calls Flask or returns high-availability C# fallbacks.
-- `GET /api/jobs`: Returns live Accenture careers compiled by the Flask scraper.
+- `GET /api/opportunities`: Fetches and filters internships from The Muse REST API.
+- `GET /api/jobs`: Fetches entry-level careers from The Muse REST API.
 - `GET /health`: Basic health state monitoring.
-
-### Python Flask Service (Port 5000)
-- `GET /api/scraped-opportunities`: Returns dynamic compiled list of internships.
-- `GET /api/scraped-jobs`: Returns scraped Accenture vacancies.
