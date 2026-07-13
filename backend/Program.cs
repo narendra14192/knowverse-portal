@@ -16,9 +16,19 @@ var builder = WebApplication.CreateBuilder(args);
 var config = builder.Configuration;
 var museApiKey = config["ApiSettings:MuseApiKey"] ?? "e267525eb7f40f0bdee9a81184697d495998da702a5742cc233667e688e74212";
 
-// Resolve frontend folder path (sibling directory to backend)
-var frontendPath = config["ApiSettings:FrontendPath"] 
-    ?? Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "frontend"));
+// Resolve frontend folder path (works both locally and on Render)
+var frontendPath = config["ApiSettings:FrontendPath"];
+if (string.IsNullOrEmpty(frontendPath))
+{
+    // Try relative to repo root (Render deploys from repo root)
+    var repoRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", ".."));
+    frontendPath = Path.Combine(repoRoot, "frontend");
+    // Fallback: relative to working directory
+    if (!Directory.Exists(frontendPath))
+        frontendPath = Path.GetFullPath("../frontend");
+    if (!Directory.Exists(frontendPath))
+        frontendPath = Path.GetFullPath("frontend");
+}
 
 // Add services
 builder.Services.AddHttpClient();
@@ -346,6 +356,7 @@ app.MapGet("/health", () => Results.Ok(new {
     serves = "Frontend + API (no Node.js, no Python)"
 }));
 
-// Single unified server: serves frontend HTML + /api/* endpoints
-// Open browser to: http://localhost:5200
-app.Run("http://localhost:5200");
+// Read PORT from environment (Render sets this automatically)
+// Locally defaults to 5200
+var port = Environment.GetEnvironmentVariable("PORT") ?? "5200";
+app.Run($"http://0.0.0.0:{port}");
