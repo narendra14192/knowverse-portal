@@ -16,18 +16,20 @@ var builder = WebApplication.CreateBuilder(args);
 var config = builder.Configuration;
 var museApiKey = config["ApiSettings:MuseApiKey"] ?? "e267525eb7f40f0bdee9a81184697d495998da702a5742cc233667e688e74212";
 
-// Resolve frontend folder path (works both locally and on Render)
+// Resolve frontend folder path (works locally, on Render, and in Docker)
 var frontendPath = config["ApiSettings:FrontendPath"];
 if (string.IsNullOrEmpty(frontendPath))
 {
-    // Try relative to repo root (Render deploys from repo root)
+    // Docker container: frontend copied next to dll
+    var dockerPath = Path.GetFullPath("./frontend");
     var repoRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", ".."));
-    frontendPath = Path.Combine(repoRoot, "frontend");
-    // Fallback: relative to working directory
-    if (!Directory.Exists(frontendPath))
-        frontendPath = Path.GetFullPath("../frontend");
-    if (!Directory.Exists(frontendPath))
-        frontendPath = Path.GetFullPath("frontend");
+    var repoFrontend = Path.Combine(repoRoot, "frontend");
+    var localPath = Path.GetFullPath("../frontend");
+
+    if (Directory.Exists(dockerPath)) frontendPath = dockerPath;
+    else if (Directory.Exists(repoFrontend)) frontendPath = repoFrontend;
+    else if (Directory.Exists(localPath)) frontendPath = localPath;
+    else frontendPath = dockerPath; // best guess
 }
 
 // Add services
