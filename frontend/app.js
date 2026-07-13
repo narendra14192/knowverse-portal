@@ -832,17 +832,17 @@ document.addEventListener('DOMContentLoaded', () => {
   ];
 
   const loadOpportunities = async () => {
-    // Stage 1: Try C# Gateway
+    // Stage 1: Try C# Backend (relative path — same server serves frontend + API)
     try {
-      const res = await fetch('http://127.0.0.1:5200/api/opportunities');
+      const res = await fetch('/api/opportunities');
       if (res.ok) {
         const data = await res.json();
         renderOpportunities(data);
-        console.log("[Knowverse Gateway] Loaded opportunities from C# API.");
+        console.log("[Knowverse] Loaded opportunities from C# ASP.NET Core backend.");
         return;
       }
     } catch (e) {
-      console.warn("[Knowverse Gateway] C# API Gateway offline/blocked. Trying direct Muse API fetch...", e);
+      console.warn("[Knowverse] C# backend unavailable. Falling back to direct Muse API fetch...", e);
     }
 
     // Stage 2: Try Direct Muse API
@@ -902,17 +902,17 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   const loadJobs = async () => {
-    // Stage 1: Try C# Gateway
+    // Stage 1: Try C# Backend (relative path — same server serves frontend + API)
     try {
-      const res = await fetch('http://127.0.0.1:5200/api/jobs');
+      const res = await fetch('/api/jobs');
       if (res.ok) {
         const data = await res.json();
         renderJobs(data);
-        console.log("[Knowverse Gateway] Loaded jobs from C# API.");
+        console.log("[Knowverse] Loaded jobs from C# ASP.NET Core backend.");
         return;
       }
     } catch (e) {
-      console.warn("[Knowverse Gateway] C# API Gateway offline/blocked. Trying direct Muse API fetch...", e);
+      console.warn("[Knowverse] C# backend unavailable. Falling back to direct Muse API fetch...", e);
     }
 
     // Stage 2: Try Direct Muse API

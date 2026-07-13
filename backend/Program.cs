@@ -2,26 +2,32 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.FileProviders;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System;
+using System.IO;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Read configuration from appsettings.json
 var config = builder.Configuration;
 var museApiKey = config["ApiSettings:MuseApiKey"] ?? "e267525eb7f40f0bdee9a81184697d495998da702a5742cc233667e688e74212";
-var frontendOrigin = config["ApiSettings:FrontendOrigin"] ?? "http://localhost:8080";
+
+// Resolve frontend folder path (sibling directory to backend)
+var frontendPath = config["ApiSettings:FrontendPath"] 
+    ?? Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "frontend"));
 
 // Add services
 builder.Services.AddHttpClient();
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("FrontendPolicy", policy =>
+    // Allow same-origin requests from the backend itself (serving static files)
+    options.AddPolicy("AllowAll", policy =>
     {
-        policy.WithOrigins(frontendOrigin, "http://127.0.0.1:8080")
+        policy.AllowAnyOrigin()
               .AllowAnyMethod()
               .AllowAnyHeader();
     });
@@ -29,7 +35,29 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-app.UseCors("FrontendPolicy");
+app.UseCors("AllowAll");
+
+// ─── Serve Frontend Static Files ───────────────────────────────────────────
+// The ASP.NET Core backend hosts the frontend directly — no Node.js needed.
+if (Directory.Exists(frontendPath))
+{
+    app.UseDefaultFiles(new DefaultFilesOptions
+    {
+        FileProvider = new PhysicalFileProvider(frontendPath),
+        RequestPath = ""
+    });
+    app.UseStaticFiles(new StaticFileOptions
+    {
+        FileProvider = new PhysicalFileProvider(frontendPath),
+        RequestPath = ""
+    });
+    Console.WriteLine($"[Knowverse] Serving frontend from: {frontendPath}");
+}
+else
+{
+    Console.WriteLine($"[Knowverse] WARNING: Frontend folder not found at {frontendPath}");
+}
+// ────────────────────────────────────────────────────────────────────────────
 
 // API key from configuration
 string ApiKey = museApiKey;
@@ -312,7 +340,12 @@ app.MapGet("/api/jobs", async (IHttpClientFactory clientFactory) =>
     return Results.Ok(fallbackJobs);
 });
 
-app.MapGet("/health", () => Results.Ok(new { status = "healthy", gateway = "ASP.NET Core Pure C# Gateway" }));
+app.MapGet("/health", () => Results.Ok(new { 
+    status = "healthy", 
+    gateway = "ASP.NET Core Pure C# Gateway",
+    serves = "Frontend + API (no Node.js, no Python)"
+}));
 
-// Listen on localhost:5200
-app.Run("http://127.0.0.1:5200");
+// Single unified server: serves frontend HTML + /api/* endpoints
+// Open browser to: http://localhost:5200
+app.Run("http://localhost:5200");

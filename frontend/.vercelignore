@@ -1,2 +1,0 @@
-# Exclude local development server — not needed on Vercel
-server.js
