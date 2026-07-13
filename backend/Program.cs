@@ -25,7 +25,10 @@ var app = builder.Build();
 
 app.UseCors("AllowAll");
 
-// Hardcoded Fallbacks in case the Flask microservice is down
+// API Configuration Constants
+const string ApiKey = "e267525eb7f40f0bdee9a81184697d495998da702a5742cc233667e688e74212";
+
+// Hardcoded Fallbacks in case The Muse API is down or rate-limited
 var fallbackOpportunities = new[]
 {
     new {
@@ -160,19 +163,87 @@ app.MapGet("/api/opportunities", async (IHttpClientFactory clientFactory) =>
     try
     {
         var client = clientFactory.CreateClient();
-        client.Timeout = TimeSpan.FromSeconds(3); // Fast timeout in case Flask microservice is off
-        var response = await client.GetAsync("http://127.0.0.1:5000/api/scraped-opportunities");
+        client.Timeout = TimeSpan.FromSeconds(4); // 4-second timeout limit
+        
+        var url = $"https://www.themuse.com/api/public/jobs?level=Internship&page=0&api_key={ApiKey}";
+        var response = await client.GetAsync(url);
         if (response.IsSuccessStatusCode)
         {
             var content = await response.Content.ReadAsStringAsync();
-            var json = JsonSerializer.Deserialize<object>(content);
-            return Results.Ok(json);
+            using var doc = JsonDocument.Parse(content);
+            var resultsElement = doc.RootElement.GetProperty("results");
+            
+            var parsedList = new List<object>();
+            int count = 0;
+            foreach (var item in resultsElement.EnumerateArray())
+            {
+                if (count >= 6) break; // Keep layout grid exactly 6 items
+                
+                string id = item.GetProperty("id").GetInt32().ToString();
+                string company = item.GetProperty("company").GetProperty("name").GetString() ?? "Unknown Company";
+                string role = item.GetProperty("name").GetString() ?? "Internship Vacancy";
+                
+                string location = "Remote / USA";
+                if (item.TryGetProperty("locations", out var locs) && locs.ValueKind == JsonValueKind.Array && locs.GetArrayLength() > 0)
+                {
+                    location = locs[0].GetProperty("name").GetString() ?? "Remote / USA";
+                }
+                
+                string category = "Tech";
+                if (item.TryGetProperty("categories", out var cats) && cats.ValueKind == JsonValueKind.Array && cats.GetArrayLength() > 0)
+                {
+                    category = cats[0].GetProperty("name").GetString() ?? "Tech";
+                }
+                
+                string tag = "Intern";
+                if (category.Contains("Software") || category.Contains("Engineering") || category.Contains("Developer")) tag = "SWE";
+                else if (category.Contains("Data") || category.Contains("Analytics")) tag = "Data";
+                else if (category.Contains("Design") || category.Contains("Creative")) tag = "Design";
+                else if (category.Contains("Security") || category.Contains("Cyber")) tag = "Security";
+                
+                string applyUrl = "https://www.themuse.com";
+                if (item.TryGetProperty("refs", out var refs) && refs.TryGetProperty("landing_page", out var lp))
+                {
+                    applyUrl = lp.GetString() ?? "https://www.themuse.com";
+                }
+                
+                // Unify company logo types
+                string logoType = "generic";
+                string compLower = company.ToLower();
+                if (compLower.Contains("microsoft")) logoType = "microsoft";
+                else if (compLower.Contains("amazon")) logoType = "amazon";
+                else if (compLower.Contains("deloitte")) logoType = "deloitte";
+                else if (compLower.Contains("tcs") || compLower.Contains("tata consultancy")) logoType = "tcs";
+                else if (compLower.Contains("nova")) logoType = "nova";
+                else if (compLower.Contains("cloudzapier")) logoType = "cloudzapier";
+
+                parsedList.Add(new {
+                    id = id,
+                    company = company,
+                    role = role,
+                    eligibility = "Tech / STEM candidates",
+                    stipend = "Competitive Stipend",
+                    duration = "3–6 months",
+                    mode = location,
+                    applyUrl = applyUrl,
+                    tag = tag,
+                    logoType = logoType,
+                    lastDate = (string?)null
+                });
+                count++;
+            }
+
+            if (parsedList.Count > 0)
+            {
+                return Results.Ok(parsedList);
+            }
         }
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"[C# Gateway] Flask microservice unreachable: {ex.Message}. Using C# fallback data.");
+        Console.WriteLine($"[C# Gateway] The Muse API unreachable: {ex.Message}. Falling back to C# static cache database.");
     }
+    
     return Results.Ok(fallbackOpportunities);
 });
 
@@ -181,23 +252,61 @@ app.MapGet("/api/jobs", async (IHttpClientFactory clientFactory) =>
     try
     {
         var client = clientFactory.CreateClient();
-        client.Timeout = TimeSpan.FromSeconds(3);
-        var response = await client.GetAsync("http://127.0.0.1:5000/api/scraped-jobs");
+        client.Timeout = TimeSpan.FromSeconds(4);
+        
+        var url = $"https://www.themuse.com/api/public/jobs?level=Entry%20Level&page=0&api_key={ApiKey}";
+        var response = await client.GetAsync(url);
         if (response.IsSuccessStatusCode)
         {
             var content = await response.Content.ReadAsStringAsync();
-            var json = JsonSerializer.Deserialize<object>(content);
-            return Results.Ok(json);
+            using var doc = JsonDocument.Parse(content);
+            var resultsElement = doc.RootElement.GetProperty("results");
+            
+            var parsedList = new List<object>();
+            int count = 0;
+            foreach (var item in resultsElement.EnumerateArray())
+            {
+                if (count >= 7) break; // Keep layout table exactly 7 items
+                
+                string company = item.GetProperty("company").GetProperty("name").GetString() ?? "Unknown Company";
+                string role = item.GetProperty("name").GetString() ?? "Job Role";
+                
+                string location = "Various Locations";
+                if (item.TryGetProperty("locations", out var locs) && locs.ValueKind == JsonValueKind.Array && locs.GetArrayLength() > 0)
+                {
+                    location = locs[0].GetProperty("name").GetString() ?? "Various Locations";
+                }
+                
+                string applyUrl = "https://www.themuse.com";
+                if (item.TryGetProperty("refs", out var refs) && refs.TryGetProperty("landing_page", out var lp))
+                {
+                    applyUrl = lp.GetString() ?? "https://www.themuse.com";
+                }
+
+                parsedList.Add(new {
+                    company = company,
+                    role = role,
+                    location = location,
+                    applyUrl = applyUrl
+                });
+                count++;
+            }
+
+            if (parsedList.Count > 0)
+            {
+                return Results.Ok(parsedList);
+            }
         }
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"[C# Gateway] Flask microservice unreachable: {ex.Message}. Using C# fallback data.");
+        Console.WriteLine($"[C# Gateway] The Muse API unreachable: {ex.Message}. Falling back to C# static cache database.");
     }
+    
     return Results.Ok(fallbackJobs);
 });
 
-app.MapGet("/health", () => Results.Ok(new { status = "healthy", gateway = "ASP.NET Core API Gateway" }));
+app.MapGet("/health", () => Results.Ok(new { status = "healthy", gateway = "ASP.NET Core Pure C# Gateway" }));
 
 // Listen on localhost:5200
 app.Run("http://127.0.0.1:5200");

@@ -569,8 +569,11 @@ document.addEventListener('DOMContentLoaded', () => {
                   </svg>
                 </div>`;
       default:
-        return `<div class="company-logo">
-                  <i data-lucide="building"></i>
+        return `<div class="company-logo" style="background-color: rgba(255, 255, 255, 0.04); color: var(--accent-color); border: 1px solid rgba(255, 255, 255, 0.08);">
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect width="20" height="14" x="2" y="7" rx="2" ry="2"/>
+                    <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+                  </svg>
                 </div>`;
     }
   };
@@ -701,30 +704,246 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  const loadOpportunitiesAndJobs = async () => {
-    // 1. Fetch Opportunities
+  // Local database fallbacks for high availability (offline or direct-load failures)
+  const localFallbackOpportunities = [
+    {
+      id: "microsoft-swe",
+      company: "Microsoft",
+      role: "Software Engineering Intern",
+      eligibility: "Bachelor's/Master's, CS/Engineering/IT",
+      stipend: "Industry Standard",
+      duration: "8–12 weeks",
+      mode: "Full-time, On-site",
+      applyUrl: "https://careers.microsoft.com/v2/global/en/students",
+      tag: "SWE",
+      logoType: "microsoft",
+      lastDate: null
+    },
+    {
+      id: "tcs-research",
+      company: "TCS",
+      role: "Research / On-Site Internship",
+      eligibility: "Final-year B.Tech, strong academic record",
+      stipend: "₹20,000–₹40,000/month",
+      duration: "12 weeks",
+      mode: "On-site / Hybrid",
+      applyUrl: "https://www.tcs.com/careers/india/internship",
+      tag: "Research",
+      logoType: "tcs",
+      lastDate: null
+    },
+    {
+      id: "amazon-sde",
+      company: "Amazon",
+      role: "Software Development Engineer Intern",
+      eligibility: "Bachelor's+ in CS/STEM, coding fundamentals",
+      stipend: "₹80,000–₹1.2L/month equivalent",
+      duration: "12 weeks (Fall 2026)",
+      mode: "On-site (US)",
+      applyUrl: "https://www.amazon.jobs/en/jobs/3116030/software-development-engineer-internship-fall-2026-us",
+      tag: "SWE",
+      logoType: "amazon",
+      lastDate: null
+    },
+    {
+      id: "deloitte-data",
+      company: "Deloitte",
+      role: "Data Analytics Job Simulation",
+      eligibility: "Open to all students, no experience required",
+      stipend: "Fully Free · Virtual Experience",
+      duration: "Self-paced (Forage, AU)",
+      mode: "Fully Virtual",
+      applyUrl: "https://www.theforage.com/simulations/deloitte-au/data-analytics-s5zy",
+      tag: "FREE",
+      logoType: "deloitte",
+      lastDate: null
+    },
+    {
+      id: "nova-robotics",
+      company: "Nova Robotics",
+      role: "Aerospace / Mechanical R&D Intern",
+      eligibility: "Aerospace / Mechanical candidates",
+      stipend: "₹10,000–₹50,000/month",
+      duration: "3–6 months",
+      mode: "In-Office",
+      applyUrl: "https://unstop.com/internships/aerospace-mechanical-rd-internship-nova-robotics-private-limited-1717688?lb=krHMyqHr&utm_medium=Share&utm_source=internships&utm_campaign=Ysatyam610",
+      tag: "R&D",
+      logoType: "nova",
+      lastDate: "20 Jul 2026"
+    },
+    {
+      id: "cloudzapier-security",
+      company: "Cloudzapier",
+      role: "Cyber Security Intern",
+      eligibility: "Cyber Security / CS / IT candidates",
+      stipend: "₹10,000–₹20,000/month",
+      duration: "3 months",
+      mode: "Work From Home",
+      applyUrl: "https://internshala.com/internship/detail/work-from-home-cyber-security-internship-at-cloudzapier1783831728",
+      tag: "Security",
+      logoType: "cloudzapier",
+      lastDate: "11 Aug 2026"
+    }
+  ];
+
+  const localFallbackJobs = [
+    {
+      company: "Accenture",
+      role: "I&F Decision Sci Practitioner Associate",
+      location: "Navi Mumbai, IN",
+      applyUrl: "https://www.accenture.com/in-en/careers/jobdetails?id=AIOC-S01653459_en&title=I%26F+Decision+Sci+Practitioner+Associate"
+    },
+    {
+      company: "Accenture",
+      role: "Analytics and Modeling Associate",
+      location: "Gurugram, IN",
+      applyUrl: "https://www.accenture.com/in-en/careers/jobdetails?id=AIOC-S01652892_en&title=Analytics+and+Modeling+Associate"
+    },
+    {
+      company: "Accenture",
+      role: "Analytics and Modeling Associate",
+      location: "Gurugram, IN",
+      applyUrl: "https://www.accenture.com/in-en/careers/jobdetails?id=AIOC-S01652283_en&title=Analytics+and+Modeling+Associate"
+    },
+    {
+      company: "Accenture",
+      role: "Analytics and Modeling Associate",
+      location: "Gurugram, IN",
+      applyUrl: "https://www.accenture.com/in-en/careers/jobdetails?id=AIOC-S01651763_en&title=Analytics+and+Modeling+Associate"
+    },
+    {
+      company: "Accenture",
+      role: "Infra Tech Support Practitioner",
+      location: "Indore, IN",
+      applyUrl: "https://www.accenture.com/in-en/careers/jobdetails?id=ATCI-5288362-S1948498_en&title=Infra+Tech+Support+Practitioner"
+    },
+    {
+      company: "Accenture",
+      role: "Technology Support Engineer",
+      location: "Indore, IN",
+      applyUrl: "https://www.accenture.com/in-en/careers/jobdetails?id=ATCI-5303823-S1970443_en&title=Technology+Support+Engineer"
+    },
+    {
+      company: "Accenture",
+      role: "Application Support Engineer",
+      location: "Hyderabad, IN",
+      applyUrl: "https://www.accenture.com/in-en/careers/jobdetails?id=14422158_en&title=Application+Support+Engineer"
+    }
+  ];
+
+  const loadOpportunities = async () => {
+    // Stage 1: Try C# Gateway
     try {
       const res = await fetch('http://127.0.0.1:5200/api/opportunities');
       if (res.ok) {
-        const opportunities = await res.ok ? await res.json() : null;
-        if (opportunities) renderOpportunities(opportunities);
+        const data = await res.json();
+        renderOpportunities(data);
+        console.log("[Knowverse Gateway] Loaded opportunities from C# API.");
+        return;
       }
-    } catch (err) {
-      console.error("[C# Gateway Client] Failed to fetch opportunities, displaying skeleton error.", err);
+    } catch (e) {
+      console.warn("[Knowverse Gateway] C# API Gateway offline/blocked. Trying direct Muse API fetch...", e);
     }
 
-    // 2. Fetch Jobs
+    // Stage 2: Try Direct Muse API
+    try {
+      const apiKey = "e267525eb7f40f0bdee9a81184697d495998da702a5742cc233667e688e74212";
+      const res = await fetch(`https://www.themuse.com/api/public/jobs?level=Internship&page=0&api_key=${apiKey}`);
+      if (res.ok) {
+        const payload = await res.json();
+        if (payload && payload.results) {
+          const mapped = payload.results.slice(0, 6).map(item => {
+            const id = item.id.toString();
+            const company = item.company?.name || "Unknown Company";
+            const role = item.name || "Internship Role";
+            const location = item.locations?.[0]?.name || "Remote";
+            const category = item.categories?.[0]?.name || "Tech";
+            
+            let tag = "Intern";
+            if (category.includes("Software") || category.includes("Engineering") || category.includes("Developer")) tag = "SWE";
+            else if (category.includes("Data") || category.includes("Analytics")) tag = "Data";
+            else if (category.includes("Design") || category.includes("Creative")) tag = "Design";
+            else if (category.includes("Security") || category.includes("Cyber")) tag = "Security";
+
+            let logoType = "generic";
+            const compLower = company.toLowerCase();
+            if (compLower.includes("microsoft")) logoType = "microsoft";
+            else if (compLower.includes("amazon")) logoType = "amazon";
+            else if (compLower.includes("deloitte")) logoType = "deloitte";
+            else if (compLower.includes("tcs") || compLower.includes("tata consultancy")) logoType = "tcs";
+            else if (compLower.includes("nova")) logoType = "nova";
+            else if (compLower.includes("cloudzapier")) logoType = "cloudzapier";
+
+            return {
+              id,
+              company,
+              role,
+              eligibility: "Tech / STEM candidates",
+              stipend: "Competitive Stipend",
+              duration: "3–6 months",
+              mode: location,
+              applyUrl: item.refs?.landing_page || "https://www.themuse.com",
+              tag,
+              logoType,
+              lastDate: null
+            };
+          });
+          renderOpportunities(mapped);
+          console.log("[Knowverse Gateway] Loaded opportunities directly from The Muse API.");
+          return;
+        }
+      }
+    } catch (e) {
+      console.warn("[Knowverse Gateway] Direct Muse API fetch failed. Using local client fallbacks...", e);
+    }
+
+    // Stage 3: Client Fallbacks (Static database)
+    renderOpportunities(localFallbackOpportunities);
+  };
+
+  const loadJobs = async () => {
+    // Stage 1: Try C# Gateway
     try {
       const res = await fetch('http://127.0.0.1:5200/api/jobs');
       if (res.ok) {
-        const jobs = await res.json();
-        renderJobs(jobs);
+        const data = await res.json();
+        renderJobs(data);
+        console.log("[Knowverse Gateway] Loaded jobs from C# API.");
+        return;
       }
-    } catch (err) {
-      console.error("[C# Gateway Client] Failed to fetch jobs, displaying skeleton error.", err);
+    } catch (e) {
+      console.warn("[Knowverse Gateway] C# API Gateway offline/blocked. Trying direct Muse API fetch...", e);
     }
+
+    // Stage 2: Try Direct Muse API
+    try {
+      const apiKey = "e267525eb7f40f0bdee9a81184697d495998da702a5742cc233667e688e74212";
+      const res = await fetch(`https://www.themuse.com/api/public/jobs?level=Entry%20Level&page=0&api_key=${apiKey}`);
+      if (res.ok) {
+        const payload = await res.json();
+        if (payload && payload.results) {
+          const mapped = payload.results.slice(0, 7).map(item => {
+            return {
+              company: item.company?.name || "Unknown Company",
+              role: item.name || "Job Vacancy",
+              location: item.locations?.[0]?.name || "Various Locations",
+              applyUrl: item.refs?.landing_page || "https://www.themuse.com"
+            };
+          });
+          renderJobs(mapped);
+          console.log("[Knowverse Gateway] Loaded jobs directly from The Muse API.");
+          return;
+        }
+      }
+    } catch (e) {
+      console.warn("[Knowverse Gateway] Direct Muse API fetch failed. Using local client fallbacks...", e);
+    }
+
+    // Stage 3: Client Fallbacks (Static database)
+    renderJobs(localFallbackJobs);
   };
 
   // Run data load
-  loadOpportunitiesAndJobs();
+  loadOpportunities();
+  loadJobs();
 });
