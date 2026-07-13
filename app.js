@@ -1,0 +1,730 @@
+document.addEventListener('DOMContentLoaded', () => {
+  // Initialize Lucide Icons
+  if (typeof lucide !== 'undefined') {
+    lucide.createIcons();
+  }
+
+  // ==========================================================================
+  // Sticky Mobile Navigation Toggle
+  // ==========================================================================
+  const navToggle = document.getElementById('nav-toggle');
+  const navMenu = document.getElementById('nav-menu');
+  const toggleIcon = document.getElementById('toggle-icon');
+  const navLinks = document.querySelectorAll('.nav-link');
+
+  if (navToggle && navMenu) {
+    navToggle.addEventListener('click', () => {
+      const isOpen = navMenu.classList.toggle('open');
+      
+      // Toggle Menu Icon (Menu <=> Close X)
+      if (toggleIcon) {
+        if (isOpen) {
+          toggleIcon.setAttribute('data-lucide', 'x');
+        } else {
+          toggleIcon.setAttribute('data-lucide', 'menu');
+        }
+        if (typeof lucide !== 'undefined') {
+          lucide.createIcons();
+        }
+      }
+    });
+
+    // Close menu when clicking links on mobile
+    navLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        if (navMenu.classList.contains('open')) {
+          navMenu.classList.remove('open');
+          if (toggleIcon) {
+            toggleIcon.setAttribute('data-lucide', 'menu');
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+          }
+        }
+      });
+    });
+  }
+
+  // ==========================================================================
+  // Fully Playable Sudoku Engine
+  // ==========================================================================
+  const puzzles = [
+    {
+      difficulty: "Medium",
+      clues: [
+        5, 3, 0, 0, 7, 0, 0, 0, 0,
+        6, 0, 0, 1, 9, 5, 0, 0, 0,
+        0, 9, 8, 0, 0, 0, 0, 6, 0,
+        8, 0, 0, 0, 6, 0, 0, 0, 3,
+        4, 0, 0, 8, 0, 3, 0, 0, 1,
+        7, 0, 0, 0, 2, 0, 0, 0, 6,
+        0, 6, 0, 0, 0, 0, 2, 8, 0,
+        0, 0, 0, 4, 1, 9, 0, 0, 5,
+        0, 0, 0, 0, 8, 0, 0, 7, 9
+      ],
+      solution: [
+        5, 3, 4, 6, 7, 8, 9, 1, 2,
+        6, 7, 2, 1, 9, 5, 3, 4, 8,
+        1, 9, 8, 3, 4, 2, 5, 6, 7,
+        8, 5, 9, 7, 6, 1, 4, 2, 3,
+        4, 2, 6, 8, 5, 3, 7, 9, 1,
+        7, 1, 3, 9, 2, 4, 8, 5, 6,
+        9, 6, 1, 5, 3, 7, 2, 8, 4,
+        2, 8, 7, 4, 1, 9, 6, 3, 5,
+        3, 4, 5, 2, 8, 6, 1, 7, 9
+      ]
+    },
+    {
+      difficulty: "Easy",
+      clues: [
+        0, 0, 0, 2, 6, 0, 7, 0, 1,
+        6, 8, 0, 0, 7, 0, 0, 9, 0,
+        1, 9, 0, 0, 0, 4, 5, 0, 0,
+        8, 2, 0, 1, 0, 0, 0, 4, 0,
+        0, 0, 4, 6, 0, 2, 9, 0, 0,
+        0, 5, 0, 0, 0, 3, 0, 2, 8,
+        0, 0, 9, 3, 0, 0, 0, 7, 4,
+        0, 4, 0, 0, 5, 0, 0, 3, 6,
+        7, 0, 3, 0, 1, 8, 0, 0, 0
+      ],
+      solution: [
+        4, 3, 5, 2, 6, 9, 7, 8, 1,
+        6, 8, 2, 5, 7, 1, 4, 9, 3,
+        1, 9, 7, 8, 3, 4, 5, 6, 2,
+        8, 2, 6, 1, 9, 5, 3, 4, 7,
+        3, 7, 4, 6, 8, 2, 9, 1, 5,
+        9, 5, 1, 7, 4, 3, 6, 2, 8,
+        5, 1, 9, 3, 2, 6, 8, 7, 4,
+        2, 4, 8, 9, 5, 7, 1, 3, 6,
+        7, 6, 3, 4, 1, 8, 2, 5, 9
+      ]
+    }
+  ];
+
+  let currentPuzzleIdx = 0;
+  let activePuzzle = null;
+  let boardState = []; // Holds user inputs
+  let selectedCellIdx = null;
+  
+  // Timer States
+  let timerInterval = null;
+  let elapsedSeconds = 0;
+
+  const sudokuGrid = document.getElementById('sudoku-grid');
+  const timerDisplay = document.getElementById('sudoku-time');
+  const difficultyDisplay = document.querySelector('.diff-value');
+  const btnReset = document.getElementById('btn-sudoku-reset');
+  const btnNew = document.getElementById('btn-sudoku-new');
+  const btnCheck = document.getElementById('btn-sudoku-check');
+  const keyButtons = document.querySelectorAll('.key-btn');
+
+  // Format timer values
+  const formatTimer = (totalSeconds) => {
+    const mins = Math.floor(totalSeconds / 60);
+    const secs = totalSeconds % 60;
+    return `${mins < 10 ? '0' : ''}${mins}:${secs < 10 ? '0' : ''}${secs}`;
+  };
+
+  const startTimer = () => {
+    clearInterval(timerInterval);
+    elapsedSeconds = 0;
+    timerDisplay.textContent = formatTimer(elapsedSeconds);
+    timerInterval = setInterval(() => {
+      elapsedSeconds++;
+      timerDisplay.textContent = formatTimer(elapsedSeconds);
+    }, 1000);
+  };
+
+  const stopTimer = () => {
+    clearInterval(timerInterval);
+  };
+
+  // Peer highlighting helper
+  const updateHighlights = () => {
+    const cells = document.querySelectorAll('.sudoku-cell');
+    
+    // Clear all previous highlight classes
+    cells.forEach(cell => {
+      cell.classList.remove('selected', 'highlighted');
+    });
+
+    if (selectedCellIdx === null) return;
+
+    const row = Math.floor(selectedCellIdx / 9);
+    const col = selectedCellIdx % 9;
+    const boxRow = Math.floor(row / 3) * 3;
+    const boxCol = Math.floor(col / 3) * 3;
+
+    cells.forEach((cell, idx) => {
+      const cRow = Math.floor(idx / 9);
+      const cCol = idx % 9;
+      const cBoxRow = Math.floor(cRow / 3) * 3;
+      const cBoxCol = Math.floor(cCol / 3) * 3;
+
+      if (idx === selectedCellIdx) {
+        cell.classList.add('selected');
+      } else if (cRow === row || cCol === col || (cBoxRow === boxRow && cBoxCol === boxCol)) {
+        // Row, Column or Box buddy
+        cell.classList.add('highlighted');
+      } else if (boardState[idx] !== 0 && boardState[idx] === boardState[selectedCellIdx]) {
+        // Highlight matching values
+        cell.classList.add('highlighted');
+      }
+    });
+  };
+
+  // Render Sudoku board
+  const renderBoard = () => {
+    sudokuGrid.innerHTML = '';
+    selectedCellIdx = null;
+
+    boardState.forEach((val, idx) => {
+      const cell = document.createElement('div');
+      cell.classList.add('sudoku-cell');
+      cell.setAttribute('role', 'gridcell');
+      cell.setAttribute('tabindex', '0');
+      
+      const isClue = activePuzzle.clues[idx] !== 0;
+
+      if (isClue) {
+        cell.classList.add('clue');
+        cell.textContent = val;
+      } else {
+        cell.textContent = val !== 0 ? val : '';
+        
+        // Input Selection click listener
+        cell.addEventListener('click', (e) => {
+          e.stopPropagation();
+          selectedCellIdx = idx;
+          updateHighlights();
+        });
+
+        // Keyboard interaction
+        cell.addEventListener('keydown', (e) => {
+          if (isClue) return;
+          
+          if (e.key >= '1' && e.key <= '9') {
+            setCellValue(idx, parseInt(e.key));
+          } else if (e.key === 'Backspace' || e.key === 'Delete' || e.key === '0') {
+            setCellValue(idx, 0);
+          }
+        });
+      }
+
+      sudokuGrid.appendChild(cell);
+    });
+  };
+
+  const setCellValue = (idx, val) => {
+    if (activePuzzle.clues[idx] !== 0) return; // Cannot overwrite clues
+    
+    boardState[idx] = val;
+    const cells = sudokuGrid.children;
+    cells[idx].textContent = val !== 0 ? val : '';
+    cells[idx].classList.remove('error'); // Clear errors on update
+    
+    updateHighlights();
+  };
+
+  // Load a new Sudoku game puzzle
+  const initGame = (puzzleIndex) => {
+    currentPuzzleIdx = puzzleIndex;
+    activePuzzle = puzzles[currentPuzzleIdx];
+    
+    // Copy clues array to represent current board state
+    boardState = [...activePuzzle.clues];
+    
+    difficultyDisplay.textContent = activePuzzle.difficulty;
+    renderBoard();
+    startTimer();
+  };
+
+  // Load random new game from presets
+  const loadNewGame = () => {
+    let nextIndex;
+    do {
+      nextIndex = Math.floor(Math.random() * puzzles.length);
+    } while (nextIndex === currentPuzzleIdx && puzzles.length > 1);
+
+    initGame(nextIndex);
+  };
+
+  // Reset current game
+  const resetGame = () => {
+    boardState = [...activePuzzle.clues];
+    renderBoard();
+    startTimer();
+  };
+
+  // Check board solution
+  const checkSolution = () => {
+    const cells = sudokuGrid.children;
+    let errorsCount = 0;
+    let unfilledCount = 0;
+
+    boardState.forEach((val, idx) => {
+      const correctVal = activePuzzle.solution[idx];
+      cells[idx].classList.remove('error');
+
+      if (val === 0) {
+        unfilledCount++;
+      } else if (val !== correctVal) {
+        cells[idx].classList.add('error');
+        errorsCount++;
+      }
+    });
+
+    if (errorsCount === 0 && unfilledCount === 0) {
+      stopTimer();
+      alert(`🎉 Congratulations! You solved the Sudoku in ${formatTimer(elapsedSeconds)}!`);
+    } else if (errorsCount > 0) {
+      alert(`❌ Found ${errorsCount} error(s) in your grid. Keep trying!`);
+    } else {
+      alert(`ℹ️ No errors found so far, but the grid is incomplete. Keep filling!`);
+    }
+  };
+
+  // Bind key buttons (touchpad input)
+  keyButtons.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (selectedCellIdx === null) return;
+      
+      const valAttr = btn.getAttribute('data-val');
+      if (valAttr === 'clear') {
+        setCellValue(selectedCellIdx, 0);
+      } else {
+        setCellValue(selectedCellIdx, parseInt(valAttr));
+      }
+    });
+  });
+
+  // Clear selections when clicking outside the grid
+  document.addEventListener('click', () => {
+    selectedCellIdx = null;
+    updateHighlights();
+  });
+
+  // Action listeners
+  btnReset.addEventListener('click', resetGame);
+  btnNew.addEventListener('click', loadNewGame);
+  btnCheck.addEventListener('click', checkSolution);
+
+  // Initialize first game on load
+  initGame(0);
+
+  // ==========================================================================
+  // Dynamic Motivational Quotes Widget
+  // ==========================================================================
+  const quotesPool = [
+    { text: "The best way to predict the future is to create it.", author: "Abraham Lincoln" },
+    { text: "The only way to do great work is to love what you do.", author: "Steve Jobs" },
+    { text: "Opportunities don't happen, you create them.", author: "Chris Grosser" },
+    { text: "Believe you can and you're halfway there.", author: "Theodore Roosevelt" },
+    { text: "Success is not final, failure is not fatal: it is the courage to continue that counts.", author: "Winston Churchill" },
+    { text: "Everything you've ever wanted is on the other side of fear.", author: "George Addair" },
+    { text: "The expert in anything was once a beginner.", author: "Helen Hayes" },
+    { text: "Do not wait for opportunities, write your own story.", author: "Unknown" }
+  ];
+
+  const quoteContent = document.getElementById('quote-content');
+  const quoteAuthor = document.getElementById('quote-author');
+  const btnRefreshQuote = document.getElementById('btn-refresh-quote');
+  
+  let currentQuoteIdx = -1;
+
+  const setRandomQuote = () => {
+    let nextIdx;
+    do {
+      nextIdx = Math.floor(Math.random() * quotesPool.length);
+    } while (nextIdx === currentQuoteIdx && quotesPool.length > 1);
+
+    currentQuoteIdx = nextIdx;
+    const quote = quotesPool[currentQuoteIdx];
+
+    if (quoteContent && quoteAuthor) {
+      // Fade out
+      quoteContent.classList.add('quote-fade-out');
+      quoteAuthor.classList.add('quote-fade-out');
+
+      setTimeout(() => {
+        quoteContent.textContent = `"${quote.text}"`;
+        quoteAuthor.textContent = `— ${quote.author}`;
+        
+        // Fade back in
+        quoteContent.classList.remove('quote-fade-out');
+        quoteAuthor.classList.remove('quote-fade-out');
+      }, 250);
+    }
+  };
+
+  if (btnRefreshQuote) {
+    btnRefreshQuote.addEventListener('click', (e) => {
+      e.stopPropagation();
+      setRandomQuote();
+      
+      // Spin icon feedback
+      const icon = document.getElementById('refresh-icon');
+      if (icon) {
+        icon.style.transform = 'rotate(360deg)';
+        icon.style.transition = 'transform 0.5s ease';
+        setTimeout(() => {
+          icon.style.transform = '';
+          icon.style.transition = '';
+        }, 500);
+      }
+    });
+  }
+
+  // Set initial quote
+  setRandomQuote();
+
+  // ==========================================================================
+  // Background Music Controller
+  // ==========================================================================
+  // PLAYLIST CONFIGURATION:
+  // To replace these tracks with your own licensed music in the future:
+  // 1. Store your custom MP3 files inside the "/music" folder in this project directory.
+  // 2. Update the array below with the relative file paths of your music files 
+  //    (e.g., "music/your-custom-song.mp3").
+  // 3. Always verify that your custom files are royalty-free, public domain, or 
+  //    properly licensed for commercial distribution.
+  const bgMusicPlaylist = [
+    "music/track1.mp3",
+    "music/track2.mp3"
+  ];
+  
+  let currentBgMusicIdx = 0;
+  const bgAudio = new Audio(bgMusicPlaylist[currentBgMusicIdx]);
+  bgAudio.volume = 0.3; // Default volume set to 30%
+  bgAudio.loop = false; // We sequence it, so we loop the playlist manually
+
+  const btnMusicToggle = document.getElementById('btn-music-toggle');
+  const btnMusicMute = document.getElementById('btn-music-mute');
+  const musicBtnIcon = document.getElementById('music-btn-icon');
+  const musicMuteIcon = document.getElementById('music-mute-icon');
+  const volumeSlider = document.getElementById('music-volume-slider');
+  const autoplayOverlay = document.getElementById('autoplay-overlay');
+  
+  let isMusicPlaying = false;
+  let preMuteVolume = 0.3;
+
+  const updateMusicIcons = () => {
+    if (musicBtnIcon) {
+      musicBtnIcon.setAttribute('data-lucide', isMusicPlaying ? 'pause' : 'play');
+    }
+    if (musicMuteIcon) {
+      const isMuted = bgAudio.volume === 0;
+      musicMuteIcon.setAttribute('data-lucide', isMuted ? 'volume-x' : bgAudio.volume < 0.4 ? 'volume-1' : 'volume-2');
+    }
+    if (btnMusicToggle) {
+      if (isMusicPlaying) {
+        btnMusicToggle.classList.add('playing');
+      } else {
+        btnMusicToggle.classList.remove('playing');
+      }
+    }
+    if (typeof lucide !== 'undefined') {
+      lucide.createIcons();
+    }
+  };
+
+  const playBgMusic = () => {
+    bgAudio.play().then(() => {
+      isMusicPlaying = true;
+      updateMusicIcons();
+      if (autoplayOverlay) autoplayOverlay.classList.remove('show');
+    }).catch(error => {
+      console.log("Autoplay blocked:", error);
+      if (autoplayOverlay) autoplayOverlay.classList.add('show');
+      
+      // Trigger play on first interaction
+      const startOnInteraction = () => {
+        bgAudio.play().then(() => {
+          isMusicPlaying = true;
+          updateMusicIcons();
+          if (autoplayOverlay) autoplayOverlay.classList.remove('show');
+          
+          // Clear interaction listeners
+          document.removeEventListener('click', startOnInteraction);
+          document.removeEventListener('keydown', startOnInteraction);
+        }).catch(err => console.log("Play on interaction failed:", err));
+      };
+      
+      document.addEventListener('click', startOnInteraction);
+      document.addEventListener('keydown', startOnInteraction);
+    });
+  };
+
+  const pauseBgMusic = () => {
+    bgAudio.pause();
+    isMusicPlaying = false;
+    updateMusicIcons();
+  };
+
+  // Toggle Music play state on main button click
+  if (btnMusicToggle) {
+    btnMusicToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (isMusicPlaying) {
+        pauseBgMusic();
+      } else {
+        playBgMusic();
+      }
+    });
+  }
+
+  // Sequence playlist on song end
+  bgAudio.addEventListener('ended', () => {
+    currentBgMusicIdx = (currentBgMusicIdx + 1) % bgMusicPlaylist.length;
+    bgAudio.src = bgMusicPlaylist[currentBgMusicIdx];
+    // Keep volume at current setting
+    playBgMusic();
+  });
+
+  // Mute / Unmute
+  const toggleMute = () => {
+    const isMuted = bgAudio.volume === 0;
+    if (isMuted) {
+      // Unmute: restore previous volume
+      bgAudio.volume = preMuteVolume > 0 ? preMuteVolume : 0.3;
+      if (volumeSlider) volumeSlider.value = Math.round(bgAudio.volume * 100);
+    } else {
+      // Mute: save current volume and set to 0
+      preMuteVolume = bgAudio.volume;
+      bgAudio.volume = 0;
+      if (volumeSlider) volumeSlider.value = 0;
+    }
+    updateMusicIcons();
+  };
+
+  if (btnMusicMute) {
+    btnMusicMute.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleMute();
+    });
+  }
+
+  // Volume slider control
+  if (volumeSlider) {
+    volumeSlider.addEventListener('input', (e) => {
+      e.stopPropagation();
+      const val = parseInt(e.target.value);
+      bgAudio.volume = val / 100;
+      if (val > 0) {
+        preMuteVolume = bgAudio.volume;
+      }
+      updateMusicIcons();
+    });
+  }
+
+  // Start background music automatically on load
+  playBgMusic();
+
+  // ==========================================================================
+  // API Gateway Fetching and Rendering
+  // ==========================================================================
+  const getCompanyLogoSvg = (logoType) => {
+    switch (logoType) {
+      case 'microsoft':
+        return `<div class="company-logo microsoft-bg">
+                  <svg viewBox="0 0 23 23" width="22" height="22">
+                    <rect x="0" y="0" width="10.5" height="10.5" fill="#f25022"/>
+                    <rect x="12.5" y="0" width="10.5" height="10.5" fill="#7fba00"/>
+                    <rect x="0" y="12.5" width="10.5" height="10.5" fill="#00a4ef"/>
+                    <rect x="12.5" y="12.5" width="10.5" height="10.5" fill="#ffb900"/>
+                  </svg>
+                </div>`;
+      case 'tcs':
+        return `<div class="company-logo tcs-bg">
+                  <svg viewBox="0 0 100 100" width="22" height="22">
+                    <circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" stroke-width="8"/>
+                    <path d="M35,38 L65,38 M50,38 L50,70" stroke="currentColor" stroke-width="10" stroke-linecap="round" fill="none"/>
+                  </svg>
+                </div>`;
+      case 'amazon':
+        return `<div class="company-logo amazon-bg">
+                  <svg viewBox="0 0 100 100" width="22" height="22">
+                    <path d="M20,60 C35,78 65,78 80,60" fill="none" stroke="#ff9900" stroke-width="10" stroke-linecap="round"/>
+                    <path d="M72,55 L83,58 L80,70" fill="#ff9900" stroke="#ff9900" stroke-width="2" stroke-linejoin="round"/>
+                  </svg>
+                </div>`;
+      case 'deloitte':
+        return `<div class="company-logo deloitte-bg">
+                  <svg viewBox="0 0 100 100" width="20" height="20">
+                    <circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" stroke-width="8"/>
+                    <circle cx="70" cy="70" r="12" fill="#86bc25"/>
+                  </svg>
+                </div>`;
+      case 'nova':
+        return `<div class="company-logo nova-bg">
+                  <svg viewBox="0 0 100 100" width="22" height="22">
+                    <polygon points="50,15 90,85 10,85" fill="none" stroke="currentColor" stroke-width="8"/>
+                    <circle cx="50" cy="55" r="15" fill="currentColor"/>
+                  </svg>
+                </div>`;
+      case 'cloudzapier':
+        return `<div class="company-logo cloudzapier-bg">
+                  <svg viewBox="0 0 100 100" width="22" height="22">
+                    <path d="M50,15 L80,30 L80,60 C80,75 50,85 50,85 C50,85 20,75 20,60 L20,30 Z" fill="none" stroke="currentColor" stroke-width="8" stroke-linejoin="round"/>
+                    <path d="M40,50 L48,58 L62,44" fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </div>`;
+      default:
+        return `<div class="company-logo">
+                  <i data-lucide="building"></i>
+                </div>`;
+    }
+  };
+
+  const renderOpportunities = (opportunities) => {
+    const container = document.getElementById('opportunities-container');
+    if (!container) return;
+    container.innerHTML = '';
+
+    opportunities.forEach(opt => {
+      const tagClass = opt.tag === 'FREE' ? 'badge-success-tag' : 'badge-tag';
+      const lastDateHtml = opt.lastDate ? `
+              <div class="meta-item">
+                <i data-lucide="hourglass" class="meta-icon"></i>
+                <div class="meta-text">
+                  <span class="meta-label">Last Date</span>
+                  <span class="meta-value">${opt.lastDate}</span>
+                </div>
+              </div>` : '';
+              
+      const card = document.createElement('article');
+      card.className = 'job-card';
+      card.innerHTML = `
+        <div class="card-header">
+          <div class="company-brand">
+            ${getCompanyLogoSvg(opt.logoType)}
+            <div class="company-info">
+              <span class="company-name">${opt.company}</span>
+              <h3 class="role-title">${opt.role}</h3>
+            </div>
+          </div>
+          <span class="badge ${tagClass}">${opt.tag}</span>
+        </div>
+
+        <div class="card-body">
+          <div class="meta-grid">
+            <div class="meta-item">
+              <i data-lucide="graduation-cap" class="meta-icon"></i>
+              <div class="meta-text">
+                <span class="meta-label">Eligibility</span>
+                <span class="meta-value">${opt.eligibility}</span>
+              </div>
+            </div>
+            <div class="meta-item">
+              <i data-lucide="circle-dollar-sign" class="meta-icon"></i>
+              <div class="meta-text">
+                <span class="meta-label">${opt.tag === 'FREE' ? 'Cost' : 'Stipend'}</span>
+                <span class="meta-value">${opt.stipend}</span>
+              </div>
+            </div>
+            <div class="meta-item">
+              <i data-lucide="calendar" class="meta-icon"></i>
+              <div class="meta-text">
+                <span class="meta-label">Duration</span>
+                <span class="meta-value">${opt.duration}</span>
+              </div>
+            </div>
+            <div class="meta-item">
+              <i data-lucide="map-pin" class="meta-icon"></i>
+              <div class="meta-text">
+                <span class="meta-label">Mode & Location</span>
+                <span class="meta-value">${opt.mode}</span>
+              </div>
+            </div>
+            ${lastDateHtml}
+          </div>
+        </div>
+
+        <div class="card-footer">
+          <a href="${opt.applyUrl}" target="_blank" rel="noopener noreferrer" class="btn-apply">
+            <span>${opt.tag === 'FREE' ? 'Start Simulation' : 'Apply Now'}</span>
+            <i data-lucide="arrow-up-right"></i>
+          </a>
+        </div>
+      `;
+      container.appendChild(card);
+    });
+
+    if (typeof lucide !== 'undefined') {
+      lucide.createIcons();
+    }
+  };
+
+  const renderJobs = (jobs) => {
+    const container = document.getElementById('jobs-container');
+    if (!container) return;
+    container.innerHTML = '';
+
+    jobs.forEach(job => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td data-label="Company" style="font-weight: 700; color: var(--text-main);">${job.company}</td>
+        <td data-label="Role" style="font-weight: 600; color: var(--text-main);">${job.role}</td>
+        <td data-label="Location" style="color: var(--text-light);">${job.location}</td>
+        <td data-label="Action">
+          <a href="${job.applyUrl}" target="_blank" rel="noopener noreferrer" class="btn-table-apply">
+            <span>Apply Now</span>
+            <i data-lucide="arrow-up-right"></i>
+          </a>
+        </td>
+      `;
+      container.appendChild(row);
+    });
+
+    // Append placeholders
+    const placeholders = [
+      { company: "Google", role: "Associate Product Manager", location: "Bangalore, IN" },
+      { company: "Meta", role: "Data Engineer (University Grad)", location: "London, UK" },
+      { company: "Stripe", role: "Software Engineer (L3)", location: "Remote (US/Canada)" }
+    ];
+
+    placeholders.forEach(ph => {
+      const row = document.createElement('tr');
+      row.className = 'job-row-coming';
+      row.innerHTML = `
+        <td data-label="Company"><span class="blur-text">${ph.company}</span></td>
+        <td data-label="Role"><span class="blur-text">${ph.role}</span></td>
+        <td data-label="Location"><span class="blur-text">${ph.location}</span></td>
+        <td data-label="Action">
+          <button class="btn-table-coming" disabled>Coming Soon</button>
+        </td>
+      `;
+      container.appendChild(row);
+    });
+
+    if (typeof lucide !== 'undefined') {
+      lucide.createIcons();
+    }
+  };
+
+  const loadOpportunitiesAndJobs = async () => {
+    // 1. Fetch Opportunities
+    try {
+      const res = await fetch('http://127.0.0.1:5200/api/opportunities');
+      if (res.ok) {
+        const opportunities = await res.ok ? await res.json() : null;
+        if (opportunities) renderOpportunities(opportunities);
+      }
+    } catch (err) {
+      console.error("[C# Gateway Client] Failed to fetch opportunities, displaying skeleton error.", err);
+    }
+
+    // 2. Fetch Jobs
+    try {
+      const res = await fetch('http://127.0.0.1:5200/api/jobs');
+      if (res.ok) {
+        const jobs = await res.json();
+        renderJobs(jobs);
+      }
+    } catch (err) {
+      console.error("[C# Gateway Client] Failed to fetch jobs, displaying skeleton error.", err);
+    }
+  };
+
+  // Run data load
+  loadOpportunitiesAndJobs();
+});

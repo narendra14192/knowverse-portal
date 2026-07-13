@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Knowverse — Internships, Ambassador Programs, Jobs & Events</title>
+  <meta name="description" content="Your gateway to internships, ambassador programs, jobs, and events. Curated and updated regularly by Knowverse.">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRokHB6ctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
+  <!-- CSS Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Background Animated Elements -->
+  <div class="bg-glow-container">
+    <div class="glow-orb orb-1"></div>
+    <div class="glow-orb orb-2"></div>
+    <div class="glow-orb orb-3"></div>
+  </div>
+
+  <!-- Sticky Top Navigation Bar -->
+  <header class="navbar">
+    <div class="nav-container">
+      <a href="#hero" class="nav-logo">
+        <span class="nav-logo-dot"></span>
+        Knowverse
+      </a>
+        <!-- Music Control Wrapper -->
+        <div class="nav-music-wrapper">
+          <button id="btn-music-toggle" class="btn-music-toggle" title="Play/Pause Music" aria-label="Play/Pause Music">
+            <i data-lucide="play" id="music-btn-icon"></i>
+          </button>
+          <div class="music-volume-popover">
+            <button id="btn-music-mute" class="btn-music-mute" title="Mute/Unmute Music" aria-label="Mute/Unmute Music">
+              <i data-lucide="volume-2" id="music-mute-icon"></i>
+            </button>
+            <input type="range" id="music-volume-slider" min="0" max="100" value="30" class="music-volume-slider" title="Volume Slider">
+          </div>
+        </div>
+
+        <!-- Hamburger Menu for Mobile -->
+      <button class="nav-toggle" id="nav-toggle" aria-label="Toggle menu">
+        <i data-lucide="menu" id="toggle-icon"></i>
+      </button>
+
+      <!-- Nav Links -->
+      <nav class="nav-menu" id="nav-menu">
+        <ul class="nav-list">
+          <li><a href="#internships" class="nav-link">Internships</a></li>
+          <li><a href="#ambassadors" class="nav-link">Ambassadors</a></li>
+          <li><a href="#events" class="nav-link">Events</a></li>
+          <li><a href="#jobs" class="nav-link">Jobs</a></li>
+          <li><a href="#sudoku" class="nav-link">Play & Win</a></li>
+          <li><a href="#follow-us" class="nav-link nav-btn-follow">Follow Us</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <div class="app-wrapper">
+    
+    <!-- SECTION 1: HERO -->
+    <section class="hero-section" id="hero">
+      <div class="hero-tag">
+        <span class="pulse-dot"></span>
+        Career & Opportunities Portal · 2026
+      </div>
+      <h1 class="hero-title">Your Gateway to Internships, Jobs & Opportunities</h1>
+      <p class="hero-subtitle">Curated openings, ambassador programs, events, and more — updated regularly by Knowverse.</p>
+      
+      <div class="hero-cta-wrapper">
+        <a href="https://www.instagram.com/knowverse_14" target="_blank" rel="noopener noreferrer" class="btn-primary-accent">
+          <i data-lucide="instagram"></i>
+          <span>Follow us on Instagram</span>
+        </a>
+      </div>
+    </section>
+
+    <!-- MOTIVATIONAL QUOTES WIDGET -->
+    <div class="quote-card" id="quote-widget">
+      <div class="quote-header">
+        <div class="quote-title-area">
+          <i data-lucide="sparkles" class="quote-title-icon"></i>
+          <span>Daily Inspiration</span>
+        </div>
+        <button id="btn-refresh-quote" class="btn-refresh-quote" title="Get New Quote" aria-label="Get New Quote">
+          <i data-lucide="refresh-cw" id="refresh-icon"></i>
+        </button>
+      </div>
+      <div class="quote-body">
+        <p class="quote-text" id="quote-content">"The best way to predict the future is to create it."</p>
+        <span class="quote-author" id="quote-author">— Abraham Lincoln</span>
+      </div>
+    </div>
+
+
+    <!-- SECTION 2: INTERNSHIP OPPORTUNITIES 2026 -->
+    <section class="portal-section" id="internships">
+      <div class="section-header">
+        <h2 class="section-title">Internship Opportunities 2026</h2>
+        <p class="section-subtitle">Hand-picked student internship positions at leading tech firms</p>
+      </div>
+
+      <div class="opportunities-grid" id="opportunities-container">
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+      </div>
+    </section>
+
+    <!-- SECTION 3: AMBASSADOR PROGRAMS -->
+    <section class="portal-section" id="ambassadors">
+      <div class="section-header">
+        <h2 class="section-title">Ambassador Programs</h2>
+        <p class="section-subtitle">Represent top organizations and build your professional network</p>
+      </div>
+
+      <article class="ambassador-card">
+        <div class="ambassador-content">
+          <div class="ambassador-brand">
+            <div class="company-logo microsoft-bg">
+              <svg viewBox="0 0 23 23" width="22" height="22">
+                <rect x="0" y="0" width="10.5" height="10.5" fill="#f25022"/>
+                <rect x="12.5" y="0" width="10.5" height="10.5" fill="#7fba00"/>
+                <rect x="0" y="12.5" width="10.5" height="10.5" fill="#00a4ef"/>
+                <rect x="12.5" y="12.5" width="10.5" height="10.5" fill="#ffb900"/>
+              </svg>
+            </div>
+            <div class="ambassador-meta">
+              <span class="badge badge-tag-accent">Official Microsoft Program</span>
+              <h3 class="ambassador-title">Microsoft Learn Student Ambassadors</h3>
+            </div>
+          </div>
+          <p class="ambassador-desc">
+            Lead a local tech community, build digital skills, gain access to exclusive Microsoft resources, and receive direct mentorship from industry professionals.
+          </p>
+        </div>
+        <div class="ambassador-footer">
+          <a href="https://mvp.microsoft.com/studentambassadors" target="_blank" rel="noopener noreferrer" class="btn-primary">
+            <span>Learn & Apply</span>
+            <i data-lucide="arrow-up-right"></i>
+          </a>
+        </div>
+      </article>
+    </section>
+
+    <!-- SECTION 4: EVENTS & COMPETITIONS -->
+    <section class="portal-section" id="events">
+      <div class="section-header">
+        <h2 class="section-title">Events & Competitions</h2>
+        <p class="section-subtitle">Showcase your skills and compete at a national scale</p>
+      </div>
+
+      <div class="events-container">
+        <article class="event-card">
+          <div class="event-body">
+            <div class="event-header-row">
+              <span class="event-category-tags">IT Operations · Quizzes & Treasure Hunt</span>
+              <span class="badge badge-tag">Online</span>
+            </div>
+            <h3 class="event-title">QuizOff 2026: India's Biggest AI Quiz</h3>
+            <p class="event-meta-info">
+              <span><i data-lucide="users"></i> Individual Participation</span>
+              <span><i data-lucide="award"></i> Certifications & Cash Prizes</span>
+            </p>
+          </div>
+          
+          <div class="event-footer">
+            <a href="https://unstop.com/quiz/google-gemini-quizoff-2026-campuscrew-1685313" target="_blank" rel="noopener noreferrer" class="btn-apply-accent">
+              <span>Register Now</span>
+              <i data-lucide="arrow-up-right"></i>
+            </a>
+          </div>
+        </article>
+        
+        <p class="event-note">
+          <i data-lucide="info"></i>
+          <span>Hosted by CampusCrew — shared here for our community, not organized by Knowverse.</span>
+        </p>
+      </div>
+    </section>
+
+    <!-- SECTION 5: JOBS BOARD -->
+    <section class="portal-section" id="jobs">
+      <div class="section-header">
+        <h2 class="section-title">Jobs Board</h2>
+        <p class="section-subtitle">Full-time graduate job roles and early career opportunities</p>
+      </div>
+
+      <div class="jobs-table-container">
+        <table class="jobs-table">
+          <thead>
+            <tr>
+              <th>Company</th>
+              <th>Role</th>
+              <th>Location</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="jobs-container">
+            <tr class="skeleton-row">
+              <td colspan="4" style="text-align: center; color: var(--text-muted); padding: 24px;">Loading jobs...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- SECTION 6: PLAY & WIN (Sudoku Game) -->
+    <section class="portal-section" id="sudoku">
+      <div class="section-header">
+        <h2 class="section-title">Take a break — play Sudoku</h2>
+        <p class="section-subtitle">Train your brain, complete the grid, and verify your solution!</p>
+      </div>
+
+      <div class="sudoku-container">
+        <!-- Sudoku Stats Bar -->
+        <div class="sudoku-bar">
+          <div class="sudoku-timer">
+            <i data-lucide="timer"></i>
+            <span id="sudoku-time">00:00</span>
+          </div>
+          <div class="sudoku-difficulty">
+            <span class="diff-label">Difficulty:</span>
+            <span class="diff-value">Medium</span>
+          </div>
+        </div>
+
+        <!-- The 9x9 Sudoku Grid -->
+        <div class="sudoku-grid" id="sudoku-grid" role="grid" aria-label="Sudoku Grid">
+          <!-- Dynamically populated via Javascript -->
+        </div>
+
+        <!-- Mobile Touch Keypad -->
+        <div class="sudoku-keypad" aria-label="Sudoku input keypad">
+          <button class="key-btn" data-val="1">1</button>
+          <button class="key-btn" data-val="2">2</button>
+          <button class="key-btn" data-val="3">3</button>
+          <button class="key-btn" data-val="4">4</button>
+          <button class="key-btn" data-val="5">5</button>
+          <button class="key-btn" data-val="6">6</button>
+          <button class="key-btn" data-val="7">7</button>
+          <button class="key-btn" data-val="8">8</button>
+          <button class="key-btn" data-val="9">9</button>
+          <button class="key-btn key-btn-clear" data-val="clear" title="Clear cell">
+            <i data-lucide="eraser"></i>
+          </button>
+        </div>
+
+        <!-- Controls Row -->
+        <div class="sudoku-controls">
+          <button class="btn-sec" id="btn-sudoku-reset">
+            <i data-lucide="refresh-cw"></i>
+            <span>Restart</span>
+          </button>
+          <button class="btn-sec" id="btn-sudoku-new">
+            <i data-lucide="sparkles"></i>
+            <span>New Game</span>
+          </button>
+          <button class="btn-primary" id="btn-sudoku-check">
+            <i data-lucide="check-circle-2"></i>
+            <span>Check Solution</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 7: FOLLOW US / FOOTER -->
+    <section class="follow-banner" id="follow-us">
+      <h2 class="banner-title">Follow @knowverse_14 on Instagram for daily internship, job & event updates</h2>
+      <a href="https://www.instagram.com/knowverse_14" target="_blank" rel="noopener noreferrer" class="btn-banner-cta">
+        <i data-lucide="instagram"></i>
+        <span>Follow us on Instagram</span>
+      </a>
+    </section>
+
+    <!-- Footer Disclaimer -->
+    <footer class="app-footer">
+      <p class="disclaimer">
+        Disclaimer: Links lead to official company or partner pages. Always verify eligibility, deadlines, and details on the original listing before applying. We share opportunities for educational and early career support.
+      </p>
+      <div class="footer-copyright">
+        &copy; 2026 Knowverse Opportunities Portal. Built with mobile-first precision.
+      </div>
+    </footer>
+
+  </div>
+
+    <!-- Autoplay Enable Overlay -->
+    <div class="autoplay-overlay" id="autoplay-overlay">
+      <div class="autoplay-overlay-content">
+        <i data-lucide="music-4" class="autoplay-icon"></i>
+        <p>Click anywhere to enable background music</p>
+      </div>
+    </div>
+
+    <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Bootstrap JS Bundle with Popper -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+  <!-- App JS Script -->
+  <script src="app.js"></script>
+</body>
+</html>

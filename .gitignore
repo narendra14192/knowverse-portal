@@ -1,0 +1,27 @@
+# Core build outputs
+backend/bin/
+backend/obj/
+backend/App_Data/
+
+# Python cache & virtual environment
+**/__pycache__/
+**/*.pyc
+microservice/venv/
+microservice/.venv/
+.env
+
+# Editor & IDE settings
+.vscode/
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# OS files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Logs
+*.log
