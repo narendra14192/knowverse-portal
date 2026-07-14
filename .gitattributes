@@ -1,4 +1,4 @@
-# Enforce LF line endings for shell scripts (prevent Windows CRLF breaking Linux)
+# Force LF line endings for all shell scripts (prevents Windows CRLF breaking Linux)
 *.sh text eol=lf
 Dockerfile text eol=lf
-.vercelignore text eol=lf
+*.yaml text eol=lf

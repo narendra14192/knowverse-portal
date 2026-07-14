@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: knowverse-portal
+    runtime: native
+    plan: free
+    region: singapore
+    repo: https://github.com/narendra14192/knowverse-portal
+    branch: main
+    buildCommand: bash render-build.sh
+    startCommand: bash render-start.sh
+    healthCheckPath: /health
+    envVars:
+      - key: ApiSettings__MuseApiKey
+        value: e267525eb7f40f0bdee9a81184697d495998da702a5742cc233667e688e74212
+      - key: ApiSettings__FrontendPath
+        value: ./frontend
