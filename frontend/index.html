@@ -110,6 +110,36 @@
         <p class="section-subtitle">Hand-picked student internship positions at leading tech firms</p>
       </div>
 
+      <!-- Search & Filters Panel -->
+      <div class="search-filter-panel">
+        <div class="search-input-wrapper">
+          <i data-lucide="search" class="search-icon"></i>
+          <input type="text" id="search-input" placeholder="Search internships or jobs (e.g. software, designer)..." title="Search Opportunities">
+        </div>
+        
+        <div class="filter-controls">
+          <div class="select-wrapper">
+            <i data-lucide="map-pin" class="select-icon"></i>
+            <select id="country-select" title="Select Country">
+              <option value="in">🇮🇳 India</option>
+              <option value="us">🇺🇸 United States</option>
+              <option value="gb">🇬🇧 United Kingdom</option>
+              <option value="ca">🇨🇦 Canada</option>
+              <option value="au">🇦🇺 Australia</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Category Filter Pills -->
+      <div class="category-pills" id="category-pills">
+        <button class="pill-btn active" data-category="internship">All Internships</button>
+        <button class="pill-btn" data-category="software engineering">Software</button>
+        <button class="pill-btn" data-category="data analyst">Data</button>
+        <button class="pill-btn" data-category="designer">Design</button>
+        <button class="pill-btn" data-category="cyber security">Security</button>
+      </div>
+
       <div class="opportunities-grid" id="opportunities-container">
         <div class="skeleton-card"></div>
         <div class="skeleton-card"></div>

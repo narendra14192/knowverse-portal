@@ -831,7 +831,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   ];
 
-  const loadOpportunities = async () => {
+  const loadOpportunities = async (searchQuery = "internship", countryCode = "in") => {
     // Helper: combine featured + API results (deduplicate by company name)
     const combineWithFeatured = (apiResults) => {
       const featuredCompanies = new Set(localFallbackOpportunities.map(o => o.company.toLowerCase()));
@@ -841,7 +841,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Stage 1: Try C# Backend (relative path — same server serves frontend + API)
     try {
-      const res = await fetch('/api/opportunities');
+      const res = await fetch(`/api/opportunities?q=${encodeURIComponent(searchQuery)}&country=${encodeURIComponent(countryCode)}`);
       if (res.ok) {
         const data = await res.json();
         // Always show featured internships first, then live API results
@@ -850,13 +850,189 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
     } catch (e) {
-      console.warn("[Knowverse] C# backend unavailable. Falling back to direct Muse API fetch...", e);
+      console.warn("[Knowverse] C# backend unavailable. Falling back to direct Adzuna API fetch...", e);
     }
 
-    // Stage 2: Try Direct Muse API
+    // Stage 2: Try Direct Adzuna API
+    try {
+      const appId = "ad843124";
+      const appKey = "84173c51c3d2cc118bca43dc9df0ad1c";
+      const res = await fetch(`https://api.adzuna.com/v1/api/jobs/${countryCode}/search/1?app_id=${appId}&app_key=${appKey}&what=${encodeURIComponent(searchQuery)}&content-type=application/json`);
+      if (res.ok) {
+        const payload = await res.json();
+        if (payload && payload.results) {
+          const mapped = payload.results.slice(0, 6).map(item => {
+            const id = (item.id || Math.random()).toString();
+            const company = item.company?.display_name || "Unknown Company";
+            const role = item.title || "Internship Role";
+            const location = item.location?.display_name || "Remote / India";
+            
+            let tag = "Intern";
+            const roleLower = role.toLowerCase();
+            if (roleLower.includes("software") || roleLower.includes("engineering") || roleLower.includes("developer")) tag = "SWE";
+            else if (roleLower.includes("data") || roleLower.includes("analytics")) tag = "Data";
+            else if (roleLower.includes("design") || roleLower.includes("creative")) tag = "Design";
+            else if (roleLower.includes("security") || roleLower.includes("cyber")) tag = "Security";
+
+            let logoType = "generic";
+            const compLower = company.toLowerCase();
+            if (compLower.includes("microsoft")) logoType = "microsoft";
+            else if (compLower.includes("amazon")) logoType = "amazon";
+            else if (compLower.includes("deloitte")) logoType = "deloitte";
+            else if (compLower.includes("tcs") || compLower.includes("tata consultancy")) logoType = "tcs";
+            else if (compLower.includes("nova")) logoType = "nova";
+            else if (compLower.includes("cloudzapier")) logoType = "cloudzapier";
+
+            return {
+              id,
+              company,
+              role,
+              eligibility: "Tech / STEM candidates",
+              stipend: "Competitive Stipend",
+              duration: "3–6 months",
+              mode: location,
+              applyUrl: item.redirect_url || "https://www.adzuna.in",
+              tag,
+              logoType,
+              lastDate: null
+            };
+          });
+          renderOpportunities(combineWithFeatured(mapped));
+          console.log("[Knowverse Gateway] Loaded opportunities directly from Adzuna API.");
+          return;
+        }
+      }
+    } catch (e) {
+      console.warn("[Knowverse Gateway] Direct Adzuna API fetch failed. Trying JSearch API...", e);
+    }
+
+    // Stage 3: Try Direct JSearch API (RapidAPI)
+    try {
+      const apiHost = "jsearch.p.rapidapi.com";
+      const apiKey = "7c9340a0b7mshd4f471766795179p161947jsnda2a0b78f8c1";
+      const res = await fetch(`https://${apiHost}/search?query=${encodeURIComponent(searchQuery)}&location=${countryCode}&page=1&num_pages=1`, {
+        method: 'GET',
+        headers: {
+          'x-rapidapi-key': apiKey,
+          'x-rapidapi-host': apiHost
+        }
+      });
+      if (res.ok) {
+        const payload = await res.json();
+        if (payload && payload.data) {
+          const mapped = payload.data.slice(0, 6).map(item => {
+            const id = item.job_id || Math.random().toString();
+            const company = item.employer_name || "Unknown Company";
+            const role = item.job_title || "Internship Role";
+            const city = item.job_city;
+            const country = item.job_country;
+            const location = (city && country) ? `${city}, ${country}` : "Remote";
+            
+            let tag = "Intern";
+            const roleLower = role.toLowerCase();
+            if (roleLower.includes("software") || roleLower.includes("engineering") || roleLower.includes("developer")) tag = "SWE";
+            else if (roleLower.includes("data") || roleLower.includes("analytics")) tag = "Data";
+            else if (roleLower.includes("design") || roleLower.includes("creative")) tag = "Design";
+            else if (roleLower.includes("security") || roleLower.includes("cyber")) tag = "Security";
+
+            let logoType = "generic";
+            const compLower = company.toLowerCase();
+            if (compLower.includes("microsoft")) logoType = "microsoft";
+            else if (compLower.includes("amazon")) logoType = "amazon";
+            else if (compLower.includes("deloitte")) logoType = "deloitte";
+            else if (compLower.includes("tcs") || compLower.includes("tata consultancy")) logoType = "tcs";
+            else if (compLower.includes("nova")) logoType = "nova";
+            else if (compLower.includes("cloudzapier")) logoType = "cloudzapier";
+
+            return {
+              id,
+              company,
+              role,
+              eligibility: "Tech / STEM candidates",
+              stipend: "Competitive Stipend",
+              duration: "3–6 months",
+              mode: location,
+              applyUrl: item.job_apply_link || "https://jsearch.p.rapidapi.com",
+              tag,
+              logoType,
+              lastDate: null
+            };
+          });
+          renderOpportunities(combineWithFeatured(mapped));
+          console.log("[Knowverse Gateway] Loaded opportunities directly from JSearch API.");
+          return;
+        }
+      }
+    } catch (e) {
+      console.warn("[Knowverse Gateway] Direct JSearch API fetch failed. Trying Remotive API...", e);
+    }
+
+    // Stage 4: Try Direct Remotive API
+    try {
+      const res = await fetch("https://remotive.com/api/remote-jobs?category=software-development");
+      if (res.ok) {
+        const payload = await res.json();
+        if (payload && payload.jobs) {
+          const filteredJobs = payload.jobs.filter(item => {
+            const roleLower = (item.title || '').toLowerCase();
+            if (searchQuery === "internship") {
+              return roleLower.includes("intern");
+            }
+            return roleLower.includes(searchQuery.toLowerCase());
+          });
+          const mapped = filteredJobs.slice(0, 6).map(item => {
+            const id = (item.id || Math.random()).toString();
+            const company = item.company_name || "Unknown Company";
+            const role = item.title || "Internship Role";
+            const location = item.candidate_required_location || "Remote";
+            
+            let tag = "Intern";
+            const roleLower = role.toLowerCase();
+            if (roleLower.includes("software") || roleLower.includes("engineering") || roleLower.includes("developer")) tag = "SWE";
+            else if (roleLower.includes("data") || roleLower.includes("analytics")) tag = "Data";
+            else if (roleLower.includes("design") || roleLower.includes("creative")) tag = "Design";
+            else if (roleLower.includes("security") || roleLower.includes("cyber")) tag = "Security";
+
+            let logoType = "generic";
+            const compLower = company.toLowerCase();
+            if (compLower.includes("microsoft")) logoType = "microsoft";
+            else if (compLower.includes("amazon")) logoType = "amazon";
+            else if (compLower.includes("deloitte")) logoType = "deloitte";
+            else if (compLower.includes("tcs") || compLower.includes("tata consultancy")) logoType = "tcs";
+            else if (compLower.includes("nova")) logoType = "nova";
+            else if (compLower.includes("cloudzapier")) logoType = "cloudzapier";
+
+            return {
+              id,
+              company,
+              role,
+              eligibility: "Tech / STEM candidates",
+              stipend: "Competitive Stipend",
+              duration: "3–6 months",
+              mode: location,
+              applyUrl: item.url || "https://remotive.com",
+              tag,
+              logoType,
+              lastDate: null
+            };
+          });
+          renderOpportunities(combineWithFeatured(mapped));
+          console.log("[Knowverse Gateway] Loaded opportunities directly from Remotive API.");
+          return;
+        }
+      }
+    } catch (e) {
+      console.warn("[Knowverse Gateway] Direct Remotive API fetch failed. Trying Muse API...", e);
+    }
+
+    // Stage 5: Try Direct Muse API
     try {
       const apiKey = "e267525eb7f40f0bdee9a81184697d495998da702a5742cc233667e688e74212";
-      const res = await fetch(`https://www.themuse.com/api/public/jobs?level=Internship&page=0&api_key=${apiKey}`);
+      let url = `https://www.themuse.com/api/public/jobs?level=Internship&page=0&api_key=${apiKey}`;
+      if (searchQuery !== "internship") {
+        url += `&desc=${encodeURIComponent(searchQuery)}`;
+      }
+      const res = await fetch(url);
       if (res.ok) {
         const payload = await res.json();
         if (payload && payload.results) {
@@ -906,11 +1082,11 @@ document.addEventListener('DOMContentLoaded', () => {
       console.warn("[Knowverse Gateway] Direct Muse API fetch failed. Using local client fallbacks...", e);
     }
 
-    // Stage 3: Client Fallbacks (Static database — always our curated internships)
+    // Stage 6: Client Fallbacks (Static database — always our curated internships)
     renderOpportunities(localFallbackOpportunities);
   };
 
-  const loadJobs = async () => {
+  const loadJobs = async (searchQuery = "software developer entry level", countryCode = "in") => {
     // Helper: combine featured jobs + API results (deduplicate by company+role)
     const combineJobsWithFeatured = (apiResults) => {
       const featuredKeys = new Set(
@@ -924,7 +1100,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Stage 1: Try C# Backend (relative path — same server serves frontend + API)
     try {
-      const res = await fetch('/api/jobs');
+      const res = await fetch(`/api/jobs?q=${encodeURIComponent(searchQuery)}&country=${encodeURIComponent(countryCode)}`);
       if (res.ok) {
         const data = await res.json();
         // Always show featured jobs first, then live API results
@@ -933,13 +1109,103 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
     } catch (e) {
-      console.warn("[Knowverse] C# backend unavailable. Falling back to direct Muse API fetch...", e);
+      console.warn("[Knowverse] C# backend unavailable. Falling back to direct Adzuna API fetch...", e);
     }
 
-    // Stage 2: Try Direct Muse API
+    // Stage 2: Try Direct Adzuna API
+    try {
+      const appId = "ad843124";
+      const appKey = "84173c51c3d2cc118bca43dc9df0ad1c";
+      const res = await fetch(`https://api.adzuna.com/v1/api/jobs/${countryCode}/search/1?app_id=${appId}&app_key=${appKey}&what=${encodeURIComponent(searchQuery)}&content-type=application/json`);
+      if (res.ok) {
+        const payload = await res.json();
+        if (payload && payload.results) {
+          const mapped = payload.results.slice(0, 7).map(item => {
+            return {
+              company: item.company?.display_name || "Unknown Company",
+              role: item.title || "Job Vacancy",
+              location: item.location?.display_name || "Various Locations",
+              applyUrl: item.redirect_url || "https://www.adzuna.in"
+            };
+          });
+          renderJobs(combineJobsWithFeatured(mapped));
+          console.log("[Knowverse Gateway] Loaded jobs directly from Adzuna API.");
+          return;
+        }
+      }
+    } catch (e) {
+      console.warn("[Knowverse Gateway] Direct Adzuna API fetch failed. Trying JSearch API...", e);
+    }
+
+    // Stage 3: Try Direct JSearch API (RapidAPI)
+    try {
+      const apiHost = "jsearch.p.rapidapi.com";
+      const apiKey = "7c9340a0b7mshd4f471766795179p161947jsnda2a0b78f8c1";
+      const res = await fetch(`https://${apiHost}/search?query=${encodeURIComponent(searchQuery)}&location=${countryCode}&page=1&num_pages=1`, {
+        method: 'GET',
+        headers: {
+          'x-rapidapi-key': apiKey,
+          'x-rapidapi-host': apiHost
+        }
+      });
+      if (res.ok) {
+        const payload = await res.json();
+        if (payload && payload.data) {
+          const mapped = payload.data.slice(0, 7).map(item => {
+            const city = item.job_city;
+            const country = item.job_country;
+            return {
+              company: item.employer_name || "Unknown Company",
+              role: item.job_title || "Job Vacancy",
+              location: (city && country) ? `${city}, ${country}` : "Various Locations",
+              applyUrl: item.job_apply_link || "https://jsearch.p.rapidapi.com"
+            };
+          });
+          renderJobs(combineJobsWithFeatured(mapped));
+          console.log("[Knowverse Gateway] Loaded jobs directly from JSearch API.");
+          return;
+        }
+      }
+    } catch (e) {
+      console.warn("[Knowverse Gateway] Direct JSearch API fetch failed. Trying Remotive API...", e);
+    }
+
+    // Stage 4: Try Direct Remotive API
+    try {
+      const res = await fetch("https://remotive.com/api/remote-jobs?category=software-development");
+      if (res.ok) {
+        const payload = await res.json();
+        if (payload && payload.jobs) {
+          const filteredJobs = payload.jobs.filter(item => {
+            const roleLower = (item.title || '').toLowerCase();
+            if (searchQuery === "software developer entry level") return true;
+            return roleLower.includes(searchQuery.toLowerCase());
+          });
+          const mapped = filteredJobs.slice(0, 7).map(item => {
+            return {
+              company: item.company_name || "Unknown Company",
+              role: item.title || "Job Vacancy",
+              location: item.candidate_required_location || "Various Locations",
+              applyUrl: item.url || "https://remotive.com"
+            };
+          });
+          renderJobs(combineJobsWithFeatured(mapped));
+          console.log("[Knowverse Gateway] Loaded jobs directly from Remotive API.");
+          return;
+        }
+      }
+    } catch (e) {
+      console.warn("[Knowverse Gateway] Direct Remotive API fetch failed. Trying Muse API...", e);
+    }
+
+    // Stage 5: Try Direct Muse API
     try {
       const apiKey = "e267525eb7f40f0bdee9a81184697d495998da702a5742cc233667e688e74212";
-      const res = await fetch(`https://www.themuse.com/api/public/jobs?level=Entry%20Level&page=0&api_key=${apiKey}`);
+      let url = `https://www.themuse.com/api/public/jobs?level=Entry%20Level&page=0&api_key=${apiKey}`;
+      if (searchQuery !== "software developer entry level") {
+        url += `&desc=${encodeURIComponent(searchQuery)}`;
+      }
+      const res = await fetch(url);
       if (res.ok) {
         const payload = await res.json();
         if (payload && payload.results) {
@@ -961,12 +1227,92 @@ document.addEventListener('DOMContentLoaded', () => {
       console.warn("[Knowverse Gateway] Direct Muse API fetch failed. Using local client fallbacks...", e);
     }
 
-    // Stage 3: Client Fallbacks (Static database — always our curated jobs)
+    // Stage 6: Client Fallbacks (Static database — always our curated jobs)
     renderJobs(localFallbackJobs);
   };
 
 
-  // Run data load
-  loadOpportunities();
-  loadJobs();
+  // Debounce helper
+  const debounce = (func, delay = 300) => {
+    let timeoutId;
+    return (...args) => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        func.apply(null, args);
+      }, delay);
+    };
+  };
+
+  // Filter State
+  let currentSearch = "";
+  let currentCountry = "in";
+  let currentCategory = "internship";
+
+  const triggerSearch = () => {
+    const query = currentSearch.trim() || currentCategory;
+    // Show skeleton states while loading
+    const opportunitiesContainer = document.getElementById("opportunities-container");
+    const jobsTableBody = document.getElementById("jobs-table-body");
+    
+    if (opportunitiesContainer) {
+      opportunitiesContainer.innerHTML = `
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+      `;
+    }
+    if (jobsTableBody) {
+      jobsTableBody.innerHTML = `
+        <tr class="skeleton-row">
+          <td colspan="4"></td>
+        </tr>
+      `;
+    }
+
+    loadOpportunities(query, currentCountry);
+    const jobsQuery = currentSearch.trim() || `${currentCategory} job`;
+    loadJobs(jobsQuery, currentCountry);
+  };
+
+  // Bind Listeners
+  const searchInput = document.getElementById("search-input");
+  if (searchInput) {
+    searchInput.addEventListener("input", debounce((e) => {
+      currentSearch = e.target.value;
+      triggerSearch();
+    }, 300));
+  }
+
+  const countrySelect = document.getElementById("country-select");
+  if (countrySelect) {
+    countrySelect.addEventListener("change", (e) => {
+      currentCountry = e.target.value;
+      triggerSearch();
+    });
+  }
+
+  const categoryPills = document.getElementById("category-pills");
+  if (categoryPills) {
+    categoryPills.addEventListener("click", (e) => {
+      const pill = e.target.closest(".pill-btn");
+      if (!pill) return;
+      
+      // Update active pill UI
+      categoryPills.querySelectorAll(".pill-btn").forEach(btn => btn.classList.remove("active"));
+      pill.classList.add("active");
+      
+      currentCategory = pill.getAttribute("data-category");
+      
+      // Reset search input if category clicked
+      if (searchInput) {
+        searchInput.value = "";
+        currentSearch = "";
+      }
+
+      triggerSearch();
+    });
+  }
+
+  // Initial load
+  triggerSearch();
 });
