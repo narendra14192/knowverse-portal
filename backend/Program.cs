@@ -20,16 +20,21 @@ var museApiKey = config["ApiSettings:MuseApiKey"] ?? "e267525eb7f40f0bdee9a81184
 var frontendPath = config["ApiSettings:FrontendPath"];
 if (string.IsNullOrEmpty(frontendPath))
 {
-    // Docker container: frontend copied next to dll
-    var dockerPath = Path.GetFullPath("./frontend");
-    var repoRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", ".."));
-    var repoFrontend = Path.Combine(repoRoot, "frontend");
-    var localPath = Path.GetFullPath("../frontend");
+    // Auto-detect: try paths in order of likelihood
+    var dockerPath    = Path.GetFullPath("./frontend");
+    var repoRoot      = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", ".."));
+    var repoFrontend  = Path.Combine(repoRoot, "frontend");
+    var localPath     = Path.GetFullPath("../frontend");
 
-    if (Directory.Exists(dockerPath)) frontendPath = dockerPath;
+    if (Directory.Exists(dockerPath))      frontendPath = dockerPath;
     else if (Directory.Exists(repoFrontend)) frontendPath = repoFrontend;
-    else if (Directory.Exists(localPath)) frontendPath = localPath;
-    else frontendPath = dockerPath; // best guess
+    else if (Directory.Exists(localPath))  frontendPath = localPath;
+    else                                   frontendPath = dockerPath;
+}
+else
+{
+    // Always convert to absolute — PhysicalFileProvider requires absolute paths
+    frontendPath = Path.GetFullPath(frontendPath);
 }
 
 // Add services
