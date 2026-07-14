@@ -1,0 +1,7 @@
+# Ignore server-side files - Vercel only serves the /frontend static files
+backend/
+Dockerfile
+start.ps1
+microservice/
+*.csproj
+*.sln
