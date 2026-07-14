@@ -832,12 +832,20 @@ document.addEventListener('DOMContentLoaded', () => {
   ];
 
   const loadOpportunities = async () => {
+    // Helper: combine featured + API results (deduplicate by company name)
+    const combineWithFeatured = (apiResults) => {
+      const featuredCompanies = new Set(localFallbackOpportunities.map(o => o.company.toLowerCase()));
+      const dedupedApi = apiResults.filter(o => !featuredCompanies.has((o.company || '').toLowerCase()));
+      return [...localFallbackOpportunities, ...dedupedApi];
+    };
+
     // Stage 1: Try C# Backend (relative path — same server serves frontend + API)
     try {
       const res = await fetch('/api/opportunities');
       if (res.ok) {
         const data = await res.json();
-        renderOpportunities(data);
+        // Always show featured internships first, then live API results
+        renderOpportunities(combineWithFeatured(data));
         console.log("[Knowverse] Loaded opportunities from C# ASP.NET Core backend.");
         return;
       }
@@ -888,7 +896,8 @@ document.addEventListener('DOMContentLoaded', () => {
               lastDate: null
             };
           });
-          renderOpportunities(mapped);
+          // Always show featured internships first, then live Muse API results
+          renderOpportunities(combineWithFeatured(mapped));
           console.log("[Knowverse Gateway] Loaded opportunities directly from The Muse API.");
           return;
         }
@@ -897,7 +906,7 @@ document.addEventListener('DOMContentLoaded', () => {
       console.warn("[Knowverse Gateway] Direct Muse API fetch failed. Using local client fallbacks...", e);
     }
 
-    // Stage 3: Client Fallbacks (Static database)
+    // Stage 3: Client Fallbacks (Static database — always our curated internships)
     renderOpportunities(localFallbackOpportunities);
   };
 
