@@ -26,10 +26,22 @@ COPY --from=build /app/publish .
 # Copy frontend static files
 COPY --from=build /app/frontend ./frontend
 
-# Render sets PORT automatically; default to 5200 locally
-ENV PORT=5200
+# ── Environment Configuration ─────────────────────────────────────────────────
+# Clear default ASP.NET port bindings — our app reads PORT env var directly
+ENV ASPNETCORE_HTTP_PORTS=""
+ENV ASPNETCORE_URLS=""
+
+# Frontend path inside container
 ENV ApiSettings__FrontendPath=./frontend
 
-EXPOSE $PORT
+# Memory conservation for Render free tier (512MB limit)
+ENV DOTNET_GCConserveMemory=9
+ENV DOTNET_GCHeapHardLimit=419430400
 
-ENTRYPOINT ["dotnet", "backend.dll"]
+# Render injects PORT at runtime; default to 5200 for local use
+ENV PORT=5200
+
+EXPOSE 5200
+
+# Use CMD (not ENTRYPOINT) so Render can override if needed
+CMD ["dotnet", "backend.dll"]
