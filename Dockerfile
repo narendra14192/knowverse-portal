@@ -1,5 +1,4 @@
 # ── Stage 1: Build ───────────────────────────────────────────────────────────
-# Force linux/amd64 to match Render infrastructure
 FROM --platform=linux/amd64 mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
@@ -8,29 +7,32 @@ RUN dotnet restore ./backend/backend.csproj
 
 COPY backend/ ./backend/
 COPY frontend/ ./frontend/
+COPY entrypoint.sh .
 
-# Publish as linux-x64 self-aware binary
-RUN dotnet publish ./backend/backend.csproj -c Release -o /app/out -r linux-x64 --no-self-contained
+# Fix line endings in case of Windows CRLF
+RUN sed -i 's/\r$//' entrypoint.sh
 
-# ── Stage 2: Runtime ─────────────────────────────────────────────────────────
-FROM --platform=linux/amd64 mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
+RUN dotnet publish ./backend/backend.csproj -c Release -o /app/out
+
+# ── Stage 2: Runtime (use full SDK — avoids stripped-runtime crashes) ─────────
+FROM --platform=linux/amd64 mcr.microsoft.com/dotnet/sdk:8.0 AS runtime
 WORKDIR /app
 
 COPY --from=build /app/out .
 COPY --from=build /src/frontend ./frontend
-COPY entrypoint.sh .
+COPY --from=build /src/entrypoint.sh .
 RUN chmod +x entrypoint.sh
 
-# Disable JIT features incompatible with older/constrained CPUs on free tier
+# Disable aggressive JIT for CPU compatibility on Render free tier
 ENV DOTNET_TieredCompilation=0
 ENV DOTNET_ReadyToRun=0
 ENV DOTNET_GCConserveMemory=5
 
-# Clear ASP.NET default port bindings (entrypoint.sh sets ASPNETCORE_URLS)
+# Clear conflicting defaults
 ENV ASPNETCORE_HTTP_PORTS=""
 ENV ASPNETCORE_URLS=""
 
-# Frontend path inside container
+# Frontend path
 ENV ApiSettings__FrontendPath=./frontend
 
 EXPOSE 5200
