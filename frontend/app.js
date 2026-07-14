@@ -911,12 +911,24 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   const loadJobs = async () => {
+    // Helper: combine featured jobs + API results (deduplicate by company+role)
+    const combineJobsWithFeatured = (apiResults) => {
+      const featuredKeys = new Set(
+        localFallbackJobs.map(j => `${j.company.toLowerCase()}|${j.role.toLowerCase()}`)
+      );
+      const dedupedApi = apiResults.filter(j =>
+        !featuredKeys.has(`${(j.company || '').toLowerCase()}|${(j.role || '').toLowerCase()}`)
+      );
+      return [...localFallbackJobs, ...dedupedApi];
+    };
+
     // Stage 1: Try C# Backend (relative path — same server serves frontend + API)
     try {
       const res = await fetch('/api/jobs');
       if (res.ok) {
         const data = await res.json();
-        renderJobs(data);
+        // Always show featured jobs first, then live API results
+        renderJobs(combineJobsWithFeatured(data));
         console.log("[Knowverse] Loaded jobs from C# ASP.NET Core backend.");
         return;
       }
@@ -939,7 +951,8 @@ document.addEventListener('DOMContentLoaded', () => {
               applyUrl: item.refs?.landing_page || "https://www.themuse.com"
             };
           });
-          renderJobs(mapped);
+          // Always show featured jobs first, then live Muse API results
+          renderJobs(combineJobsWithFeatured(mapped));
           console.log("[Knowverse Gateway] Loaded jobs directly from The Muse API.");
           return;
         }
@@ -948,9 +961,10 @@ document.addEventListener('DOMContentLoaded', () => {
       console.warn("[Knowverse Gateway] Direct Muse API fetch failed. Using local client fallbacks...", e);
     }
 
-    // Stage 3: Client Fallbacks (Static database)
+    // Stage 3: Client Fallbacks (Static database — always our curated jobs)
     renderJobs(localFallbackJobs);
   };
+
 
   // Run data load
   loadOpportunities();
