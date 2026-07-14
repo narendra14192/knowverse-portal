@@ -578,10 +578,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  const renderOpportunities = (opportunities) => {
+  const renderOpportunities = (opportunities, append = false) => {
     const container = document.getElementById('opportunities-container');
     if (!container) return;
-    container.innerHTML = '';
+    if (!append) {
+      container.innerHTML = '';
+    }
 
     opportunities.forEach(opt => {
       const tagClass = opt.tag === 'FREE' ? 'badge-success-tag' : 'badge-tag';
@@ -657,10 +659,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  const renderJobs = (jobs) => {
+  const renderJobs = (jobs, append = false) => {
     const container = document.getElementById('jobs-container');
     if (!container) return;
-    container.innerHTML = '';
+    if (!append) {
+      container.innerHTML = '';
+    } else {
+      container.querySelectorAll('.job-row-coming').forEach(row => row.remove());
+    }
 
     jobs.forEach(job => {
       const row = document.createElement('tr');
@@ -678,7 +684,8 @@ document.addEventListener('DOMContentLoaded', () => {
       container.appendChild(row);
     });
 
-    // Append placeholders
+    // Re-append placeholders to the bottom
+    container.querySelectorAll('.job-row-coming').forEach(row => row.remove());
     const placeholders = [
       { company: "Google", role: "Associate Product Manager", location: "Bangalore, IN" },
       { company: "Meta", role: "Data Engineer (University Grad)", location: "London, UK" },
@@ -831,9 +838,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   ];
 
-  const loadOpportunities = async (searchQuery = "internship", countryCode = "in") => {
+  const loadOpportunities = async (searchQuery = "internship", countryCode = "in", page = 1, append = false) => {
     // Helper: combine featured + API results (deduplicate by company name)
     const combineWithFeatured = (apiResults) => {
+      if (page > 1) return apiResults;
       const featuredCompanies = new Set(localFallbackOpportunities.map(o => o.company.toLowerCase()));
       const dedupedApi = apiResults.filter(o => !featuredCompanies.has((o.company || '').toLowerCase()));
       return [...localFallbackOpportunities, ...dedupedApi];
@@ -841,12 +849,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Stage 1: Try C# Backend (relative path — same server serves frontend + API)
     try {
-      const res = await fetch(`/api/opportunities?q=${encodeURIComponent(searchQuery)}&country=${encodeURIComponent(countryCode)}`);
+      const res = await fetch(`/api/opportunities?q=${encodeURIComponent(searchQuery)}&country=${encodeURIComponent(countryCode)}&page=${page}`);
       if (res.ok) {
         const data = await res.json();
         // Always show featured internships first, then live API results
-        renderOpportunities(combineWithFeatured(data));
+        renderOpportunities(combineWithFeatured(data), append);
         console.log("[Knowverse] Loaded opportunities from C# ASP.NET Core backend.");
+        updateLoadMoreButton("load-more-opportunities-btn", data.length);
         return;
       }
     } catch (e) {
@@ -857,7 +866,7 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       const appId = "ad843124";
       const appKey = "84173c51c3d2cc118bca43dc9df0ad1c";
-      const res = await fetch(`https://api.adzuna.com/v1/api/jobs/${countryCode}/search/1?app_id=${appId}&app_key=${appKey}&what=${encodeURIComponent(searchQuery)}&content-type=application/json`);
+      const res = await fetch(`https://api.adzuna.com/v1/api/jobs/${countryCode}/search/${page}?app_id=${appId}&app_key=${appKey}&what=${encodeURIComponent(searchQuery)}&content-type=application/json`);
       if (res.ok) {
         const payload = await res.json();
         if (payload && payload.results) {
@@ -897,8 +906,9 @@ document.addEventListener('DOMContentLoaded', () => {
               lastDate: null
             };
           });
-          renderOpportunities(combineWithFeatured(mapped));
+          renderOpportunities(combineWithFeatured(mapped), append);
           console.log("[Knowverse Gateway] Loaded opportunities directly from Adzuna API.");
+          updateLoadMoreButton("load-more-opportunities-btn", mapped.length);
           return;
         }
       }
@@ -910,7 +920,7 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       const apiHost = "jsearch.p.rapidapi.com";
       const apiKey = "7c9340a0b7mshd4f471766795179p161947jsnda2a0b78f8c1";
-      const res = await fetch(`https://${apiHost}/search?query=${encodeURIComponent(searchQuery)}&location=${countryCode}&page=1&num_pages=1`, {
+      const res = await fetch(`https://${apiHost}/search?query=${encodeURIComponent(searchQuery)}&location=${countryCode}&page=${page}&num_pages=1`, {
         method: 'GET',
         headers: {
           'x-rapidapi-key': apiKey,
@@ -958,8 +968,9 @@ document.addEventListener('DOMContentLoaded', () => {
               lastDate: null
             };
           });
-          renderOpportunities(combineWithFeatured(mapped));
+          renderOpportunities(combineWithFeatured(mapped), append);
           console.log("[Knowverse Gateway] Loaded opportunities directly from JSearch API.");
+          updateLoadMoreButton("load-more-opportunities-btn", mapped.length);
           return;
         }
       }
@@ -980,7 +991,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             return roleLower.includes(searchQuery.toLowerCase());
           });
-          const mapped = filteredJobs.slice(0, 6).map(item => {
+          const mapped = filteredJobs.slice((page - 1) * 6, page * 6).map(item => {
             const id = (item.id || Math.random()).toString();
             const company = item.company_name || "Unknown Company";
             const role = item.title || "Internship Role";
@@ -1016,8 +1027,9 @@ document.addEventListener('DOMContentLoaded', () => {
               lastDate: null
             };
           });
-          renderOpportunities(combineWithFeatured(mapped));
+          renderOpportunities(combineWithFeatured(mapped), append);
           console.log("[Knowverse Gateway] Loaded opportunities directly from Remotive API.");
+          updateLoadMoreButton("load-more-opportunities-btn", mapped.length);
           return;
         }
       }
@@ -1028,7 +1040,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Stage 5: Try Direct Muse API
     try {
       const apiKey = "e267525eb7f40f0bdee9a81184697d495998da702a5742cc233667e688e74212";
-      let url = `https://www.themuse.com/api/public/jobs?level=Internship&page=0&api_key=${apiKey}`;
+      let url = `https://www.themuse.com/api/public/jobs?level=Internship&page=${page - 1}&api_key=${apiKey}`;
       if (searchQuery !== "internship") {
         url += `&desc=${encodeURIComponent(searchQuery)}`;
       }
@@ -1073,8 +1085,9 @@ document.addEventListener('DOMContentLoaded', () => {
             };
           });
           // Always show featured internships first, then live Muse API results
-          renderOpportunities(combineWithFeatured(mapped));
+          renderOpportunities(combineWithFeatured(mapped), append);
           console.log("[Knowverse Gateway] Loaded opportunities directly from The Muse API.");
+          updateLoadMoreButton("load-more-opportunities-btn", mapped.length);
           return;
         }
       }
@@ -1083,12 +1096,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Stage 6: Client Fallbacks (Static database — always our curated internships)
-    renderOpportunities(localFallbackOpportunities);
+    if (!append) {
+      renderOpportunities(localFallbackOpportunities, false);
+      updateLoadMoreButton("load-more-opportunities-btn", 0);
+    }
   };
 
-  const loadJobs = async (searchQuery = "software developer entry level", countryCode = "in") => {
+  const loadJobs = async (searchQuery = "software developer entry level", countryCode = "in", page = 1, append = false) => {
     // Helper: combine featured jobs + API results (deduplicate by company+role)
     const combineJobsWithFeatured = (apiResults) => {
+      if (page > 1) return apiResults;
       const featuredKeys = new Set(
         localFallbackJobs.map(j => `${j.company.toLowerCase()}|${j.role.toLowerCase()}`)
       );
@@ -1100,12 +1117,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Stage 1: Try C# Backend (relative path — same server serves frontend + API)
     try {
-      const res = await fetch(`/api/jobs?q=${encodeURIComponent(searchQuery)}&country=${encodeURIComponent(countryCode)}`);
+      const res = await fetch(`/api/jobs?q=${encodeURIComponent(searchQuery)}&country=${encodeURIComponent(countryCode)}&page=${page}`);
       if (res.ok) {
         const data = await res.json();
         // Always show featured jobs first, then live API results
-        renderJobs(combineJobsWithFeatured(data));
+        renderJobs(combineJobsWithFeatured(data), append);
         console.log("[Knowverse] Loaded jobs from C# ASP.NET Core backend.");
+        updateLoadMoreButton("load-more-jobs-btn", data.length);
         return;
       }
     } catch (e) {
@@ -1116,7 +1134,7 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       const appId = "ad843124";
       const appKey = "84173c51c3d2cc118bca43dc9df0ad1c";
-      const res = await fetch(`https://api.adzuna.com/v1/api/jobs/${countryCode}/search/1?app_id=${appId}&app_key=${appKey}&what=${encodeURIComponent(searchQuery)}&content-type=application/json`);
+      const res = await fetch(`https://api.adzuna.com/v1/api/jobs/${countryCode}/search/${page}?app_id=${appId}&app_key=${appKey}&what=${encodeURIComponent(searchQuery)}&content-type=application/json`);
       if (res.ok) {
         const payload = await res.json();
         if (payload && payload.results) {
@@ -1128,8 +1146,9 @@ document.addEventListener('DOMContentLoaded', () => {
               applyUrl: item.redirect_url || "https://www.adzuna.in"
             };
           });
-          renderJobs(combineJobsWithFeatured(mapped));
+          renderJobs(combineJobsWithFeatured(mapped), append);
           console.log("[Knowverse Gateway] Loaded jobs directly from Adzuna API.");
+          updateLoadMoreButton("load-more-jobs-btn", mapped.length);
           return;
         }
       }
@@ -1141,7 +1160,7 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       const apiHost = "jsearch.p.rapidapi.com";
       const apiKey = "7c9340a0b7mshd4f471766795179p161947jsnda2a0b78f8c1";
-      const res = await fetch(`https://${apiHost}/search?query=${encodeURIComponent(searchQuery)}&location=${countryCode}&page=1&num_pages=1`, {
+      const res = await fetch(`https://${apiHost}/search?query=${encodeURIComponent(searchQuery)}&location=${countryCode}&page=${page}&num_pages=1`, {
         method: 'GET',
         headers: {
           'x-rapidapi-key': apiKey,
@@ -1161,8 +1180,9 @@ document.addEventListener('DOMContentLoaded', () => {
               applyUrl: item.job_apply_link || "https://jsearch.p.rapidapi.com"
             };
           });
-          renderJobs(combineJobsWithFeatured(mapped));
+          renderJobs(combineJobsWithFeatured(mapped), append);
           console.log("[Knowverse Gateway] Loaded jobs directly from JSearch API.");
+          updateLoadMoreButton("load-more-jobs-btn", mapped.length);
           return;
         }
       }
@@ -1181,7 +1201,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (searchQuery === "software developer entry level") return true;
             return roleLower.includes(searchQuery.toLowerCase());
           });
-          const mapped = filteredJobs.slice(0, 7).map(item => {
+          const mapped = filteredJobs.slice((page - 1) * 7, page * 7).map(item => {
             return {
               company: item.company_name || "Unknown Company",
               role: item.title || "Job Vacancy",
@@ -1189,8 +1209,9 @@ document.addEventListener('DOMContentLoaded', () => {
               applyUrl: item.url || "https://remotive.com"
             };
           });
-          renderJobs(combineJobsWithFeatured(mapped));
+          renderJobs(combineJobsWithFeatured(mapped), append);
           console.log("[Knowverse Gateway] Loaded jobs directly from Remotive API.");
+          updateLoadMoreButton("load-more-jobs-btn", mapped.length);
           return;
         }
       }
@@ -1201,7 +1222,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Stage 5: Try Direct Muse API
     try {
       const apiKey = "e267525eb7f40f0bdee9a81184697d495998da702a5742cc233667e688e74212";
-      let url = `https://www.themuse.com/api/public/jobs?level=Entry%20Level&page=0&api_key=${apiKey}`;
+      let url = `https://www.themuse.com/api/public/jobs?level=Entry%20Level&page=${page - 1}&api_key=${apiKey}`;
       if (searchQuery !== "software developer entry level") {
         url += `&desc=${encodeURIComponent(searchQuery)}`;
       }
@@ -1218,8 +1239,9 @@ document.addEventListener('DOMContentLoaded', () => {
             };
           });
           // Always show featured jobs first, then live Muse API results
-          renderJobs(combineJobsWithFeatured(mapped));
+          renderJobs(combineJobsWithFeatured(mapped), append);
           console.log("[Knowverse Gateway] Loaded jobs directly from The Muse API.");
+          updateLoadMoreButton("load-more-jobs-btn", mapped.length);
           return;
         }
       }
@@ -1228,7 +1250,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Stage 6: Client Fallbacks (Static database — always our curated jobs)
-    renderJobs(localFallbackJobs);
+    if (!append) {
+      renderJobs(localFallbackJobs, false);
+      updateLoadMoreButton("load-more-jobs-btn", 0);
+    }
   };
 
 
@@ -1248,11 +1273,33 @@ document.addEventListener('DOMContentLoaded', () => {
   let currentCountry = "in";
   let currentCategory = "internship";
 
+  let opportunitiesPage = 1;
+  let jobsPage = 1;
+
+  const updateLoadMoreButton = (btnId, itemCount) => {
+    const btn = document.getElementById(btnId);
+    if (!btn) return;
+    
+    btn.classList.remove("loading");
+    const span = btn.querySelector("span");
+    if (span) {
+      span.textContent = btnId === "load-more-opportunities-btn" ? "Load More Internships" : "Load More Jobs";
+    }
+
+    if (itemCount === 0) {
+      btn.style.display = "none";
+    } else {
+      btn.style.display = "inline-flex";
+    }
+  };
+
   const triggerSearch = () => {
+    opportunitiesPage = 1;
+    jobsPage = 1;
+
     const query = currentSearch.trim() || currentCategory;
-    // Show skeleton states while loading
     const opportunitiesContainer = document.getElementById("opportunities-container");
-    const jobsTableBody = document.getElementById("jobs-table-body");
+    const jobsTableBody = document.getElementById("jobs-container");
     
     if (opportunitiesContainer) {
       opportunitiesContainer.innerHTML = `
@@ -1264,14 +1311,19 @@ document.addEventListener('DOMContentLoaded', () => {
     if (jobsTableBody) {
       jobsTableBody.innerHTML = `
         <tr class="skeleton-row">
-          <td colspan="4"></td>
+          <td colspan="4" style="height: 100px;"></td>
         </tr>
       `;
     }
 
-    loadOpportunities(query, currentCountry);
+    const optBtn = document.getElementById("load-more-opportunities-btn");
+    const jobBtn = document.getElementById("load-more-jobs-btn");
+    if (optBtn) optBtn.style.display = "none";
+    if (jobBtn) jobBtn.style.display = "none";
+
+    loadOpportunities(query, currentCountry, 1, false);
     const jobsQuery = currentSearch.trim() || `${currentCategory} job`;
-    loadJobs(jobsQuery, currentCountry);
+    loadJobs(jobsQuery, currentCountry, 1, false);
   };
 
   // Bind Listeners
@@ -1297,19 +1349,44 @@ document.addEventListener('DOMContentLoaded', () => {
       const pill = e.target.closest(".pill-btn");
       if (!pill) return;
       
-      // Update active pill UI
       categoryPills.querySelectorAll(".pill-btn").forEach(btn => btn.classList.remove("active"));
       pill.classList.add("active");
       
       currentCategory = pill.getAttribute("data-category");
       
-      // Reset search input if category clicked
       if (searchInput) {
         searchInput.value = "";
         currentSearch = "";
       }
 
       triggerSearch();
+    });
+  }
+
+  // Load More Listeners
+  const loadMoreOpportunitiesBtn = document.getElementById("load-more-opportunities-btn");
+  if (loadMoreOpportunitiesBtn) {
+    loadMoreOpportunitiesBtn.addEventListener("click", () => {
+      opportunitiesPage++;
+      loadMoreOpportunitiesBtn.classList.add("loading");
+      const span = loadMoreOpportunitiesBtn.querySelector("span");
+      if (span) span.textContent = "Loading...";
+      
+      const query = currentSearch.trim() || currentCategory;
+      loadOpportunities(query, currentCountry, opportunitiesPage, true);
+    });
+  }
+
+  const loadMoreJobsBtn = document.getElementById("load-more-jobs-btn");
+  if (loadMoreJobsBtn) {
+    loadMoreJobsBtn.addEventListener("click", () => {
+      jobsPage++;
+      loadMoreJobsBtn.classList.add("loading");
+      const span = loadMoreJobsBtn.querySelector("span");
+      if (span) span.textContent = "Loading...";
+      
+      const jobsQuery = currentSearch.trim() || `${currentCategory} job`;
+      loadJobs(jobsQuery, currentCountry, jobsPage, true);
     });
   }
 

@@ -213,17 +213,18 @@ var fallbackJobs = new[]
 };
 
 // Endpoints
-app.MapGet("/api/opportunities", async (IHttpClientFactory clientFactory, string? q, string? country) =>
+app.MapGet("/api/opportunities", async (IHttpClientFactory clientFactory, string? q, string? country, int? page) =>
 {
     string query = string.IsNullOrEmpty(q) ? "internship" : q;
     string locationCode = string.IsNullOrEmpty(country) ? "in" : country.ToLower();
+    int pageNum = page ?? 1;
 
     // Try Adzuna API
     try
     {
         var client = clientFactory.CreateClient();
         client.Timeout = TimeSpan.FromSeconds(4);
-        var url = $"https://api.adzuna.com/v1/api/jobs/{locationCode}/search/1?app_id={adzunaAppId}&app_key={adzunaAppKey}&what={Uri.EscapeDataString(query)}&content-type=application/json";
+        var url = $"https://api.adzuna.com/v1/api/jobs/{locationCode}/search/{pageNum}?app_id={adzunaAppId}&app_key={adzunaAppKey}&what={Uri.EscapeDataString(query)}&content-type=application/json";
         var response = await client.GetAsync(url);
         if (response.IsSuccessStatusCode)
         {
@@ -309,7 +310,7 @@ app.MapGet("/api/opportunities", async (IHttpClientFactory clientFactory, string
         var request = new HttpRequestMessage
         {
             Method = HttpMethod.Get,
-            RequestUri = new Uri($"https://{rapidApiHost}/search?query={Uri.EscapeDataString(query)}&location={locationCode}&page=1&num_pages=1"),
+            RequestUri = new Uri($"https://{rapidApiHost}/search?query={Uri.EscapeDataString(query)}&location={locationCode}&page={pageNum}&num_pages=1"),
             Headers =
             {
                 { "x-rapidapi-key", rapidApiKey },
@@ -399,11 +400,10 @@ app.MapGet("/api/opportunities", async (IHttpClientFactory clientFactory, string
             if (doc.RootElement.TryGetProperty("jobs", out var jobsElement) && jobsElement.ValueKind == JsonValueKind.Array)
             {
                 var parsedList = new List<object>();
-                int count = 0;
-                foreach (var item in jobsElement.EnumerateArray())
+                var itemsArray = jobsElement.EnumerateArray().ToList();
+                var filteredItems = new List<JsonElement>();
+                foreach (var item in itemsArray)
                 {
-                    if (count >= 6) break;
-                    
                     string role = item.TryGetProperty("title", out var titleProp) ? titleProp.GetString() ?? "" : "";
                     if (query == "internship")
                     {
@@ -413,7 +413,15 @@ app.MapGet("/api/opportunities", async (IHttpClientFactory clientFactory, string
                     {
                         if (!role.ToLower().Contains(query.ToLower())) continue;
                     }
-                    
+                    filteredItems.Add(item);
+                }
+
+                int itemsToSkip = (pageNum - 1) * 6;
+                var pagedItems = filteredItems.Skip(itemsToSkip).Take(6);
+                int count = 0;
+                foreach (var item in pagedItems)
+                {
+                    string role = item.TryGetProperty("title", out var titleProp) ? titleProp.GetString() ?? "" : "";
                     string id = item.TryGetProperty("id", out var idProp) ? idProp.GetInt64().ToString() : Guid.NewGuid().ToString();
                     string company = item.TryGetProperty("company_name", out var compProp) ? compProp.GetString() ?? "Unknown Company" : "Unknown Company";
                     string location = item.TryGetProperty("candidate_required_location", out var locProp) ? locProp.GetString() ?? "Remote" : "Remote";
@@ -471,7 +479,7 @@ app.MapGet("/api/opportunities", async (IHttpClientFactory clientFactory, string
         var client = clientFactory.CreateClient();
         client.Timeout = TimeSpan.FromSeconds(4); // 4-second timeout limit
         
-        var url = $"https://www.themuse.com/api/public/jobs?level=Internship&page=0&api_key={ApiKey}";
+        var url = $"https://www.themuse.com/api/public/jobs?level=Internship&page={pageNum - 1}&api_key={ApiKey}";
         if (query != "internship")
         {
             url += $"&desc={Uri.EscapeDataString(query)}";
@@ -557,17 +565,18 @@ app.MapGet("/api/opportunities", async (IHttpClientFactory clientFactory, string
     return Results.Ok(fallbackOpportunities);
 });
 
-app.MapGet("/api/jobs", async (IHttpClientFactory clientFactory, string? q, string? country) =>
+app.MapGet("/api/jobs", async (IHttpClientFactory clientFactory, string? q, string? country, int? page) =>
 {
     string query = string.IsNullOrEmpty(q) ? "software developer entry level" : q;
     string locationCode = string.IsNullOrEmpty(country) ? "in" : country.ToLower();
+    int pageNum = page ?? 1;
 
     // Try Adzuna API
     try
     {
         var client = clientFactory.CreateClient();
         client.Timeout = TimeSpan.FromSeconds(4);
-        var url = $"https://api.adzuna.com/v1/api/jobs/{locationCode}/search/1?app_id={adzunaAppId}&app_key={adzunaAppKey}&what={Uri.EscapeDataString(query)}&content-type=application/json";
+        var url = $"https://api.adzuna.com/v1/api/jobs/{locationCode}/search/{pageNum}?app_id={adzunaAppId}&app_key={adzunaAppKey}&what={Uri.EscapeDataString(query)}&content-type=application/json";
         var response = await client.GetAsync(url);
         if (response.IsSuccessStatusCode)
         {
@@ -628,7 +637,7 @@ app.MapGet("/api/jobs", async (IHttpClientFactory clientFactory, string? q, stri
         var request = new HttpRequestMessage
         {
             Method = HttpMethod.Get,
-            RequestUri = new Uri($"https://{rapidApiHost}/search?query={Uri.EscapeDataString(query)}&location={locationCode}&page=1&num_pages=1"),
+            RequestUri = new Uri($"https://{rapidApiHost}/search?query={Uri.EscapeDataString(query)}&location={locationCode}&page={pageNum}&num_pages=1"),
             Headers =
             {
                 { "x-rapidapi-key", rapidApiKey },
@@ -694,15 +703,22 @@ app.MapGet("/api/jobs", async (IHttpClientFactory clientFactory, string? q, stri
             if (doc.RootElement.TryGetProperty("jobs", out var jobsElement) && jobsElement.ValueKind == JsonValueKind.Array)
             {
                 var parsedList = new List<object>();
-                int count = 0;
-                foreach (var item in jobsElement.EnumerateArray())
+                var itemsArray = jobsElement.EnumerateArray().ToList();
+                var filteredItems = new List<JsonElement>();
+                foreach (var item in itemsArray)
                 {
-                    if (count >= 7) break; // Keep layout table exactly 7 items
-                    
+                    string role = item.TryGetProperty("title", out var titleProp) ? titleProp.GetString() ?? "" : "";
+                    if (query != "software developer entry level" && !role.ToLower().Contains(query.ToLower())) continue;
+                    filteredItems.Add(item);
+                }
+
+                int itemsToSkip = (pageNum - 1) * 7;
+                var pagedItems = filteredItems.Skip(itemsToSkip).Take(7);
+                int count = 0;
+                foreach (var item in pagedItems)
+                {
                     string company = item.TryGetProperty("company_name", out var compProp) ? compProp.GetString() ?? "Unknown Company" : "Unknown Company";
                     string role = item.TryGetProperty("title", out var titleProp) ? titleProp.GetString() ?? "Job Role" : "Job Role";
-                    if (query != "software developer entry level" && !role.ToLower().Contains(query.ToLower())) continue;
-
                     string location = item.TryGetProperty("candidate_required_location", out var locProp) ? locProp.GetString() ?? "Remote" : "Remote";
                     string applyUrl = item.TryGetProperty("url", out var urlProp) ? urlProp.GetString() ?? "https://remotive.com" : "https://remotive.com";
 
@@ -734,7 +750,7 @@ app.MapGet("/api/jobs", async (IHttpClientFactory clientFactory, string? q, stri
         var client = clientFactory.CreateClient();
         client.Timeout = TimeSpan.FromSeconds(4);
         
-        var url = $"https://www.themuse.com/api/public/jobs?level=Entry%20Level&page=0&api_key={ApiKey}";
+        var url = $"https://www.themuse.com/api/public/jobs?level=Entry%20Level&page={pageNum - 1}&api_key={ApiKey}";
         if (query != "software developer entry level")
         {
             url += $"&desc={Uri.EscapeDataString(query)}";
