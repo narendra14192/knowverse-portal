@@ -1,47 +1,32 @@
-# ── Stage 1: Build the C# backend ───────────────────────────────────────────
+# ── Stage 1: Build ───────────────────────────────────────────────────────────
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-# Copy and restore backend dependencies
 COPY backend/backend.csproj ./backend/
 RUN dotnet restore ./backend/backend.csproj
 
-# Copy all source files
 COPY backend/ ./backend/
 COPY frontend/ ./frontend/
 
-# Publish release build
-RUN dotnet publish ./backend/backend.csproj -c Release -o /app/publish
+RUN dotnet publish ./backend/backend.csproj -c Release -o /app/out
 
-# Copy frontend static files into the published output location
-RUN cp -r ./frontend /app/frontend
-
-# ── Stage 2: Runtime image ───────────────────────────────────────────────────
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
+# ── Stage 2: Runtime ─────────────────────────────────────────────────────────
+# Use jammy (Ubuntu 22.04) for broadest native library compatibility
+FROM mcr.microsoft.com/dotnet/aspnet:8.0-jammy AS runtime
 WORKDIR /app
 
-# Copy published backend
-COPY --from=build /app/publish .
+COPY --from=build /app/out .
+COPY --from=build /src/frontend ./frontend
 
-# Copy frontend static files
-COPY --from=build /app/frontend ./frontend
-
-# ── Environment Configuration ─────────────────────────────────────────────────
-# Clear default ASP.NET port bindings — our app reads PORT env var directly
-ENV ASPNETCORE_HTTP_PORTS=""
+# Clear conflicting defaults set by the base image
 ENV ASPNETCORE_URLS=""
+ENV ASPNETCORE_HTTP_PORTS=""
 
-# Frontend path inside container
+# Frontend path inside the container
 ENV ApiSettings__FrontendPath=./frontend
 
-# Memory conservation for Render free tier (512MB limit)
-ENV DOTNET_GCConserveMemory=9
-ENV DOTNET_GCHeapHardLimit=419430400
+# Mild memory conservation (safe for 512MB Render free tier)
+ENV DOTNET_GCConserveMemory=5
 
-# Render injects PORT at runtime; default to 5200 for local use
-ENV PORT=5200
-
-EXPOSE 5200
-
-# Use CMD (not ENTRYPOINT) so Render can override if needed
-CMD ["dotnet", "backend.dll"]
+# Use shell form so $PORT is expanded at runtime (Render sets PORT dynamically)
+CMD dotnet backend.dll
