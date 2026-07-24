@@ -212,8 +212,243 @@ var fallbackJobs = new[]
     }
 };
 
+var fallbackCertifications = new[]
+{
+    new {
+        id = "gcp-cloud-digital-leader",
+        title = "Google Cloud Digital Leader & Skill Badges",
+        provider = "Google Cloud",
+        category = "cloud",
+        isFree = true,
+        skills = new[] { "Cloud Computing", "GCP", "Infrastructure", "Security" },
+        duration = "Self-paced (10–15 hrs)",
+        level = "Beginner",
+        applyUrl = "https://www.cloudskillsboost.google/",
+        tag = "FREE BADGE",
+        logoType = "google"
+    },
+    new {
+        id = "aws-educate-cloud",
+        title = "AWS Educate Cloud Practitioner & Badges",
+        provider = "Amazon Web Services",
+        category = "cloud",
+        isFree = true,
+        skills = new[] { "AWS Core Services", "Cloud Architecture", "S3", "EC2" },
+        duration = "Self-paced (20 hrs)",
+        level = "Beginner to Intermediate",
+        applyUrl = "https://aws.amazon.com/education/awseducate/",
+        tag = "100% FREE",
+        logoType = "aws"
+    },
+    new {
+        id = "ms-azure-fundamentals",
+        title = "Microsoft Azure Fundamentals (AZ-900) & Applied Skills",
+        provider = "Microsoft Learn",
+        category = "cloud",
+        isFree = true,
+        skills = new[] { "Azure Cloud", "Identity", "Governance", "Virtual Machines" },
+        duration = "Self-paced",
+        level = "Beginner",
+        applyUrl = "https://learn.microsoft.com/en-us/credentials/",
+        tag = "FREE LEARNING",
+        logoType = "microsoft"
+    },
+    new {
+        id = "meta-frontend-dev",
+        title = "Meta Front-End Developer Professional Certificate",
+        provider = "Meta (Coursera)",
+        category = "software",
+        isFree = false,
+        skills = new[] { "React.js", "JavaScript", "HTML5/CSS3", "UX/UI Principles" },
+        duration = "6 months (5 hrs/wk)",
+        level = "Beginner",
+        applyUrl = "https://www.coursera.org/professional-certificates/meta-front-end-developer",
+        tag = "VERIFIED CERTIFICATE",
+        logoType = "meta"
+    },
+    new {
+        id = "harvard-cs50",
+        title = "CS50: Introduction to Computer Science",
+        provider = "Harvard University (edX)",
+        category = "software",
+        isFree = true,
+        skills = new[] { "C", "Python", "SQL", "Algorithms", "Data Structures" },
+        duration = "12 weeks (6–18 hrs/wk)",
+        level = "Beginner",
+        applyUrl = "https://pll.harvard.edu/course/cs50-introduction-computer-science",
+        tag = "100% FREE AUDIT",
+        logoType = "harvard"
+    },
+    new {
+        id = "freecodecamp-web",
+        title = "Responsive Web Design & JavaScript Algorithms",
+        provider = "freeCodeCamp",
+        category = "software",
+        isFree = true,
+        skills = new[] { "HTML5", "CSS3", "ES6+ JavaScript", "Algorithms" },
+        duration = "300 hours (Self-paced)",
+        level = "Beginner",
+        applyUrl = "https://www.freecodecamp.org/",
+        tag = "FREE CERTIFICATION",
+        logoType = "freecodecamp"
+    },
+    new {
+        id = "ibm-data-science",
+        title = "IBM Data Science & AI Engineering Professional Certificate",
+        provider = "IBM SkillsBuild",
+        category = "ai",
+        isFree = true,
+        skills = new[] { "Python", "Data Analysis", "Machine Learning", "SQL", "Pandas" },
+        duration = "Self-paced",
+        level = "Intermediate",
+        applyUrl = "https://skillsbuild.org/",
+        tag = "FREE FOR STUDENTS",
+        logoType = "ibm"
+    },
+    new {
+        id = "cisco-cybersecurity",
+        title = "Cybersecurity Essentials & Network Defense",
+        provider = "Cisco Networking Academy",
+        category = "cyber",
+        isFree = true,
+        skills = new[] { "Network Security", "Threat Intelligence", "Ethical Hacking" },
+        duration = "30 hours",
+        level = "Intermediate",
+        applyUrl = "https://www.netacad.com/",
+        tag = "100% FREE",
+        logoType = "cisco"
+    },
+    new {
+        id = "forage-tech-simulations",
+        title = "Deloitte & Accenture Tech Virtual Job Simulations",
+        provider = "Forage",
+        category = "software",
+        isFree = true,
+        skills = new[] { "Data Analytics", "Software Engineering", "Cyber Defense" },
+        duration = "5–6 hours (Self-paced)",
+        level = "All Levels",
+        applyUrl = "https://www.theforage.com/",
+        tag = "FREE CERTIFICATE",
+        logoType = "forage"
+    },
+    new {
+        id = "postman-api-expert",
+        title = "Postman API Fundamentals Student Expert",
+        provider = "Postman",
+        category = "software",
+        isFree = true,
+        skills = new[] { "REST APIs", "Postman Collections", "HTTP Methods", "API Testing" },
+        duration = "3 hours",
+        level = "Beginner",
+        applyUrl = "https://studentexperts.postman.com/",
+        tag = "BADGE & CERTIFICATE",
+        logoType = "postman"
+    },
+    new {
+        id = "infosys-springboard",
+        title = "Web Development, Python & Full-Stack Courses",
+        provider = "Infosys Springboard",
+        category = "software",
+        isFree = true,
+        skills = new[] { "Python", "HTML", "CSS", "JavaScript", "SQL", "Web Dev" },
+        duration = "Self-paced",
+        level = "Beginner to Intermediate",
+        applyUrl = "https://infyspringboard.onwingspan.com",
+        tag = "FREE CERTIFICATE",
+        logoType = "infosys"
+    },
+    new {
+        id = "great-learning-academy",
+        title = "Python, Django & Software Engineering Courses",
+        provider = "Great Learning Academy",
+        category = "software",
+        isFree = true,
+        skills = new[] { "Python", "Django", "Web Development", "Data Science" },
+        duration = "Self-paced (2–4 hrs)",
+        level = "Beginner",
+        applyUrl = "https://www.mygreatlearning.com/academy",
+        tag = "FREE CERTIFICATE",
+        logoType = "greatlearning"
+    },
+    new {
+        id = "simplilearn-skillup",
+        title = "Free Python & Programming SkillUp Courses",
+        provider = "Simplilearn SkillUp",
+        category = "software",
+        isFree = true,
+        skills = new[] { "Python", "Data Science", "Coding Fundamentals" },
+        duration = "Self-paced (4–9 hrs)",
+        level = "Beginner",
+        applyUrl = "https://www.skillup.simplilearn.com",
+        tag = "FREE CERTIFICATE",
+        logoType = "simplilearn"
+    },
+    new {
+        id = "kaggle-learn-python",
+        title = "Kaggle Learn: Python & Data Science Micro-Courses",
+        provider = "Kaggle",
+        category = "ai",
+        isFree = true,
+        skills = new[] { "Python", "Data Analysis", "Pandas", "Machine Learning" },
+        duration = "Self-paced (5 hrs)",
+        level = "Beginner",
+        applyUrl = "https://www.kaggle.com/learn",
+        tag = "FREE BADGE & CERTIFICATE",
+        logoType = "kaggle"
+    },
+    new {
+        id = "cisco-python-essentials",
+        title = "Cisco Python Essentials (Skills for All)",
+        provider = "Cisco Networking Academy",
+        category = "software",
+        isFree = true,
+        skills = new[] { "Python", "Object-Oriented Programming", "Algorithms" },
+        duration = "75 hours (Self-paced)",
+        level = "Beginner to Intermediate",
+        applyUrl = "https://www.netacad.com/courses/python",
+        tag = "FREE CERTIFICATE",
+        logoType = "cisco"
+    }
+};
+
 // Endpoints
+app.MapGet("/api/certifications", (string? q, string? category, int? page) =>
+{
+    var list = fallbackCertifications.AsEnumerable();
+
+    if (!string.IsNullOrWhiteSpace(category) && category.ToLower() != "all")
+    {
+        string catLower = category.ToLower();
+        if (catLower == "free")
+        {
+            list = list.Where(c => c.isFree);
+        }
+        else
+        {
+            list = list.Where(c => c.category.Equals(catLower, StringComparison.OrdinalIgnoreCase));
+        }
+    }
+
+    if (!string.IsNullOrWhiteSpace(q))
+    {
+        string queryLower = q.ToLower();
+        list = list.Where(c => 
+            c.title.ToLower().Contains(queryLower) ||
+            c.provider.ToLower().Contains(queryLower) ||
+            c.skills.Any(s => s.ToLower().Contains(queryLower)) ||
+            c.tag.ToLower().Contains(queryLower)
+        );
+    }
+
+    int pageNum = page ?? 1;
+    int pageSize = 6;
+    var pagedList = list.Skip((pageNum - 1) * pageSize).Take(pageSize).ToList();
+
+    return Results.Ok(pagedList);
+});
+
 app.MapGet("/api/opportunities", async (IHttpClientFactory clientFactory, string? q, string? country, int? page) =>
+
 {
     string query = string.IsNullOrEmpty(q) ? "internship" : q;
     string locationCode = string.IsNullOrEmpty(country) ? "in" : country.ToLower();

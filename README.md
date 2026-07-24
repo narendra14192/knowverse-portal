@@ -77,4 +77,6 @@ Open `index.html` directly in your browser, or host the `frontend/` directory us
 ### C# API Gateway (Port 5200)
 - `GET /api/opportunities?q={query}&country={countryCode}&page={page}`: Fetches and filters internships from the upstream APIs.
 - `GET /api/jobs?q={query}&country={countryCode}&page={page}`: Fetches entry-level careers from the upstream APIs.
+- `GET /api/certifications?category={category}&q={query}&page={page}`: Serves curated certifications and free skill credentials (Google Cloud, AWS, Microsoft, Meta, IBM, Harvard CS50, freeCodeCamp, Forage, Postman).
 - `GET /health`: Basic health state monitoring.
+

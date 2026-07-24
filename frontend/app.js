@@ -568,6 +568,98 @@ document.addEventListener('DOMContentLoaded', () => {
                     <path d="M40,50 L48,58 L62,44" fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
                   </svg>
                 </div>`;
+      case 'google':
+        return `<div class="company-logo google-bg">
+                  <svg viewBox="0 0 24 24" width="22" height="22">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                  </svg>
+                </div>`;
+      case 'aws':
+        return `<div class="company-logo aws-bg">
+                  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#ff9900" stroke-width="2">
+                    <path d="M6 16.5C10 19 14 19 18 16.5" stroke-linecap="round"/>
+                    <path d="M16 16L18.5 16.5L17.5 14" stroke-linecap="round" stroke-linejoin="round"/>
+                    <text x="3" y="12" font-size="8" font-weight="bold" fill="#ffffff" stroke="none">AWS</text>
+                  </svg>
+                </div>`;
+      case 'meta':
+        return `<div class="company-logo meta-bg">
+                  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#0081fb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 12c-2-3-4.5-5-7-5S1 9 1 12s2.5 5 4 5 5-2 7-5zm0 0c2 3 4.5 5 7 5s4-2 4-5-2.5-5-4-5-5 2-7 5z"/>
+                  </svg>
+                </div>`;
+      case 'ibm':
+        return `<div class="company-logo ibm-bg">
+                  <svg viewBox="0 0 24 24" width="22" height="22">
+                    <text x="1" y="16" font-size="11" font-weight="900" fill="#054ada" letter-spacing="1">IBM</text>
+                  </svg>
+                </div>`;
+      case 'cisco':
+        return `<div class="company-logo cisco-bg">
+                  <svg viewBox="0 0 24 24" width="22" height="22" fill="#049fd9">
+                    <rect x="2" y="10" width="2" height="8" rx="1"/>
+                    <rect x="6" y="6" width="2" height="12" rx="1"/>
+                    <rect x="10" y="3" width="2" height="15" rx="1"/>
+                    <rect x="14" y="6" width="2" height="12" rx="1"/>
+                    <rect x="18" y="10" width="2" height="8" rx="1"/>
+                  </svg>
+                </div>`;
+      case 'harvard':
+        return `<div class="company-logo harvard-bg">
+                  <svg viewBox="0 0 24 24" width="22" height="22" fill="#a51c30">
+                    <path d="M12 2L3 6v6c0 5.5 3.8 10.7 9 12 5.2-1.3 9-6.5 9-12V6l-9-4z"/>
+                    <text x="6" y="14" font-size="7" font-weight="bold" fill="#ffffff">CS50</text>
+                  </svg>
+                </div>`;
+      case 'freecodecamp':
+        return `<div class="company-logo fcc-bg">
+                  <svg viewBox="0 0 24 24" width="22" height="22" fill="#0a0a23" stroke="#00e676" stroke-width="2">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z"/>
+                  </svg>
+                </div>`;
+      case 'forage':
+        return `<div class="company-logo forage-bg">
+                  <svg viewBox="0 0 24 24" width="22" height="22" fill="#6c5ce7">
+                    <circle cx="12" cy="12" r="10"/>
+                    <text x="8" y="16" font-size="12" font-weight="bold" fill="#ffffff">F</text>
+                  </svg>
+                </div>`;
+      case 'postman':
+        return `<div class="company-logo postman-bg">
+                  <svg viewBox="0 0 24 24" width="22" height="22" fill="#ff6c37">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M7 12l3 3 7-7" stroke="#ffffff" stroke-width="2" fill="none"/>
+                  </svg>
+                </div>`;
+      case 'infosys':
+        return `<div class="company-logo infosys-bg">
+                  <svg viewBox="0 0 24 24" width="22" height="22">
+                    <text x="2" y="16" font-size="10" font-weight="900" fill="#007cc3">INFY</text>
+                  </svg>
+                </div>`;
+      case 'greatlearning':
+        return `<div class="company-logo gl-bg">
+                  <svg viewBox="0 0 24 24" width="22" height="22" fill="#0052cc">
+                    <circle cx="12" cy="12" r="10"/>
+                    <text x="7" y="16" font-size="11" font-weight="bold" fill="#ffffff">GL</text>
+                  </svg>
+                </div>`;
+      case 'simplilearn':
+        return `<div class="company-logo simplilearn-bg">
+                  <svg viewBox="0 0 24 24" width="22" height="22" fill="#f7931e">
+                    <circle cx="12" cy="12" r="10"/>
+                    <text x="7" y="16" font-size="11" font-weight="bold" fill="#ffffff">SL</text>
+                  </svg>
+                </div>`;
+      case 'kaggle':
+        return `<div class="company-logo kaggle-bg">
+                  <svg viewBox="0 0 24 24" width="22" height="22">
+                    <text x="4" y="17" font-size="15" font-weight="bold" fill="#20beff">K</text>
+                  </svg>
+                </div>`;
       default:
         return `<div class="company-logo" style="background-color: rgba(255, 255, 255, 0.04); color: var(--accent-color); border: 1px solid rgba(255, 255, 255, 0.08);">
                   <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -837,6 +929,322 @@ document.addEventListener('DOMContentLoaded', () => {
       applyUrl: "https://www.accenture.com/in-en/careers/jobdetails?id=14422158_en&title=Application+Support+Engineer"
     }
   ];
+
+  const localFallbackCertifications = [
+    {
+      id: "gcp-cloud-digital-leader",
+      title: "Google Cloud Digital Leader & Skill Badges",
+      provider: "Google Cloud",
+      category: "cloud",
+      isFree: true,
+      skills: ["Cloud Computing", "GCP", "Infrastructure", "Security"],
+      duration: "Self-paced (10–15 hrs)",
+      level: "Beginner",
+      applyUrl: "https://www.cloudskillsboost.google/",
+      tag: "FREE BADGE",
+      logoType: "google"
+    },
+    {
+      id: "aws-educate-cloud",
+      title: "AWS Educate Cloud Practitioner & Badges",
+      provider: "Amazon Web Services",
+      category: "cloud",
+      isFree: true,
+      skills: ["AWS Core Services", "Cloud Architecture", "S3", "EC2"],
+      duration: "Self-paced (20 hrs)",
+      level: "Beginner to Intermediate",
+      applyUrl: "https://aws.amazon.com/education/awseducate/",
+      tag: "100% FREE",
+      logoType: "aws"
+    },
+    {
+      id: "ms-azure-fundamentals",
+      title: "Microsoft Azure Fundamentals (AZ-900) & Applied Skills",
+      provider: "Microsoft Learn",
+      category: "cloud",
+      isFree: true,
+      skills: ["Azure Cloud", "Identity", "Governance", "Virtual Machines"],
+      duration: "Self-paced",
+      level: "Beginner",
+      applyUrl: "https://learn.microsoft.com/en-us/credentials/",
+      tag: "FREE LEARNING",
+      logoType: "microsoft"
+    },
+    {
+      id: "meta-frontend-dev",
+      title: "Meta Front-End Developer Professional Certificate",
+      provider: "Meta (Coursera)",
+      category: "software",
+      isFree: false,
+      skills: ["React.js", "JavaScript", "HTML5/CSS3", "UX/UI Principles"],
+      duration: "6 months (5 hrs/wk)",
+      level: "Beginner",
+      applyUrl: "https://www.coursera.org/professional-certificates/meta-front-end-developer",
+      tag: "VERIFIED CERTIFICATE",
+      logoType: "meta"
+    },
+    {
+      id: "harvard-cs50",
+      title: "CS50: Introduction to Computer Science",
+      provider: "Harvard University (edX)",
+      category: "software",
+      isFree: true,
+      skills: ["C", "Python", "SQL", "Algorithms", "Data Structures"],
+      duration: "12 weeks (6–18 hrs/wk)",
+      level: "Beginner",
+      applyUrl: "https://pll.harvard.edu/course/cs50-introduction-computer-science",
+      tag: "100% FREE AUDIT",
+      logoType: "harvard"
+    },
+    {
+      id: "freecodecamp-web",
+      title: "Responsive Web Design & JavaScript Algorithms",
+      provider: "freeCodeCamp",
+      category: "software",
+      isFree: true,
+      skills: ["HTML5", "CSS3", "ES6+ JavaScript", "Algorithms"],
+      duration: "300 hours (Self-paced)",
+      level: "Beginner",
+      applyUrl: "https://www.freecodecamp.org/",
+      tag: "FREE CERTIFICATION",
+      logoType: "freecodecamp"
+    },
+    {
+      id: "ibm-data-science",
+      title: "IBM Data Science & AI Engineering Professional Certificate",
+      provider: "IBM SkillsBuild",
+      category: "ai",
+      isFree: true,
+      skills: ["Python", "Data Analysis", "Machine Learning", "SQL", "Pandas"],
+      duration: "Self-paced",
+      level: "Intermediate",
+      applyUrl: "https://skillsbuild.org/",
+      tag: "FREE FOR STUDENTS",
+      logoType: "ibm"
+    },
+    {
+      id: "cisco-cybersecurity",
+      title: "Cybersecurity Essentials & Network Defense",
+      provider: "Cisco Networking Academy",
+      category: "cyber",
+      isFree: true,
+      skills: ["Network Security", "Threat Intelligence", "Ethical Hacking"],
+      duration: "30 hours",
+      level: "Intermediate",
+      applyUrl: "https://www.netacad.com/",
+      tag: "100% FREE",
+      logoType: "cisco"
+    },
+    {
+      id: "forage-tech-simulations",
+      title: "Deloitte & Accenture Tech Virtual Job Simulations",
+      provider: "Forage",
+      category: "software",
+      isFree: true,
+      skills: ["Data Analytics", "Software Engineering", "Cyber Defense"],
+      duration: "5–6 hours (Self-paced)",
+      level: "All Levels",
+      applyUrl: "https://www.theforage.com/",
+      tag: "FREE CERTIFICATE",
+      logoType: "forage"
+    },
+    {
+      id: "postman-api-expert",
+      title: "Postman API Fundamentals Student Expert",
+      provider: "Postman",
+      category: "software",
+      isFree: true,
+      skills: ["REST APIs", "Postman Collections", "HTTP Methods", "API Testing"],
+      duration: "3 hours",
+      level: "Beginner",
+      applyUrl: "https://studentexperts.postman.com/",
+      tag: "BADGE & CERTIFICATE",
+      logoType: "postman"
+    },
+    {
+      id: "infosys-springboard",
+      title: "Web Development, Python & Full-Stack Courses",
+      provider: "Infosys Springboard",
+      category: "software",
+      isFree: true,
+      skills: ["Python", "HTML", "CSS", "JavaScript", "SQL", "Web Dev"],
+      duration: "Self-paced",
+      level: "Beginner to Intermediate",
+      applyUrl: "https://infyspringboard.onwingspan.com",
+      tag: "FREE CERTIFICATE",
+      logoType: "infosys"
+    },
+    {
+      id: "great-learning-academy",
+      title: "Python, Django & Software Engineering Courses",
+      provider: "Great Learning Academy",
+      category: "software",
+      isFree: true,
+      skills: ["Python", "Django", "Web Development", "Data Science"],
+      duration: "Self-paced (2–4 hrs)",
+      level: "Beginner",
+      applyUrl: "https://www.mygreatlearning.com/academy",
+      tag: "FREE CERTIFICATE",
+      logoType: "greatlearning"
+    },
+    {
+      id: "simplilearn-skillup",
+      title: "Free Python & Programming SkillUp Courses",
+      provider: "Simplilearn SkillUp",
+      category: "software",
+      isFree: true,
+      skills: ["Python", "Data Science", "Coding Fundamentals"],
+      duration: "Self-paced (4–9 hrs)",
+      level: "Beginner",
+      applyUrl: "https://www.skillup.simplilearn.com",
+      tag: "FREE CERTIFICATE",
+      logoType: "simplilearn"
+    },
+    {
+      id: "kaggle-learn-python",
+      title: "Kaggle Learn: Python & Data Science Micro-Courses",
+      provider: "Kaggle",
+      category: "ai",
+      isFree: true,
+      skills: ["Python", "Data Analysis", "Pandas", "Machine Learning"],
+      duration: "Self-paced (5 hrs)",
+      level: "Beginner",
+      applyUrl: "https://www.kaggle.com/learn",
+      tag: "FREE BADGE & CERTIFICATE",
+      logoType: "kaggle"
+    },
+    {
+      id: "cisco-python-essentials",
+      title: "Cisco Python Essentials (Skills for All)",
+      provider: "Cisco Networking Academy",
+      category: "software",
+      isFree: true,
+      skills: ["Python", "Object-Oriented Programming", "Algorithms"],
+      duration: "75 hours (Self-paced)",
+      level: "Beginner to Intermediate",
+      applyUrl: "https://www.netacad.com/courses/python",
+      tag: "FREE CERTIFICATE",
+      logoType: "cisco"
+    }
+  ];
+
+  const renderCertifications = (certifications, append = false) => {
+    const container = document.getElementById('certifications-container');
+    if (!container) return;
+    if (!append) {
+      container.innerHTML = '';
+    }
+
+    if (!certifications || certifications.length === 0) {
+      if (!append) {
+        container.innerHTML = `
+          <div style="grid-column: 1 / -1; text-align: center; padding: 40px 20px; color: var(--text-muted);">
+            <i data-lucide="award" style="width: 48px; height: 48px; stroke-width: 1.5; color: var(--text-light); margin-bottom: 12px;"></i>
+            <p style="font-size: 1.05rem; font-weight: 500;">No certifications match your query.</p>
+          </div>
+        `;
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+      }
+      return;
+    }
+
+    certifications.forEach(cert => {
+      const tagClass = cert.isFree ? 'badge-success-tag' : 'badge-tag';
+      const skillsHtml = cert.skills && cert.skills.length > 0 ? `
+        <div class="cert-skills-list">
+          ${cert.skills.map(s => `<span class="cert-skill-pill">${s}</span>`).join('')}
+        </div>
+      ` : '';
+
+      const card = document.createElement('article');
+      card.className = 'job-card cert-card';
+      card.innerHTML = `
+        <div class="card-header">
+          <div class="company-brand">
+            ${getCompanyLogoSvg(cert.logoType)}
+            <div class="company-info">
+              <span class="company-name">${cert.provider}</span>
+              <h3 class="role-title">${cert.title}</h3>
+            </div>
+          </div>
+          <span class="badge ${tagClass}">${cert.tag}</span>
+        </div>
+
+        <div class="card-body">
+          <div class="meta-grid">
+            <div class="meta-item">
+              <i data-lucide="award" class="meta-icon"></i>
+              <div class="meta-text">
+                <span class="meta-label">Level</span>
+                <span class="meta-value">${cert.level || 'All Levels'}</span>
+              </div>
+            </div>
+            <div class="meta-item">
+              <i data-lucide="clock" class="meta-icon"></i>
+              <div class="meta-text">
+                <span class="meta-label">Duration</span>
+                <span class="meta-value">${cert.duration || 'Self-paced'}</span>
+              </div>
+            </div>
+          </div>
+          ${skillsHtml}
+        </div>
+
+        <div class="card-footer">
+          <a href="${cert.applyUrl}" target="_blank" rel="noopener noreferrer" class="btn-apply">
+            <span>Enroll & Learn</span>
+            <i data-lucide="arrow-up-right"></i>
+          </a>
+        </div>
+      `;
+      container.appendChild(card);
+    });
+
+    if (typeof lucide !== 'undefined') {
+      lucide.createIcons();
+    }
+  };
+
+  const loadCertifications = async (category = "all", searchQuery = "", page = 1, append = false) => {
+    try {
+      const res = await fetch(`/api/certifications?category=${encodeURIComponent(category)}&q=${encodeURIComponent(searchQuery)}&page=${page}`);
+      if (res.ok) {
+        const data = await res.json();
+        renderCertifications(data, append);
+        console.log("[Knowverse] Loaded certifications from C# backend.");
+        updateLoadMoreButton("load-more-certs-btn", data.length);
+        return;
+      }
+    } catch (e) {
+      console.warn("[Knowverse] C# backend unavailable for certifications. Using local fallbacks...", e);
+    }
+
+    // Client Failover filtering
+    let filtered = localFallbackCertifications;
+    if (category && category.toLowerCase() !== "all") {
+      const catLower = category.toLowerCase();
+      if (catLower === "free") {
+        filtered = filtered.filter(c => c.isFree);
+      } else {
+        filtered = filtered.filter(c => c.category.toLowerCase() === catLower);
+      }
+    }
+
+    if (searchQuery.trim()) {
+      const qLower = searchQuery.trim().toLowerCase();
+      filtered = filtered.filter(c => 
+        c.title.toLowerCase().includes(qLower) ||
+        c.provider.toLowerCase().includes(qLower) ||
+        c.skills.some(s => s.toLowerCase().includes(qLower)) ||
+        c.tag.toLowerCase().includes(qLower)
+      );
+    }
+
+    const pageSize = 6;
+    const paged = filtered.slice((page - 1) * pageSize, page * pageSize);
+    renderCertifications(paged, append);
+    updateLoadMoreButton("load-more-certs-btn", paged.length);
+  };
 
   const loadOpportunities = async (searchQuery = "internship", countryCode = "in", page = 1, append = false) => {
     // Helper: combine featured + API results (deduplicate by company name)
@@ -1272,9 +1680,11 @@ document.addEventListener('DOMContentLoaded', () => {
   let currentSearch = "";
   let currentCountry = "in";
   let currentCategory = "internship";
+  let currentCertCategory = "all";
 
   let opportunitiesPage = 1;
   let jobsPage = 1;
+  let certsPage = 1;
 
   const updateLoadMoreButton = (btnId, itemCount) => {
     const btn = document.getElementById(btnId);
@@ -1283,7 +1693,9 @@ document.addEventListener('DOMContentLoaded', () => {
     btn.classList.remove("loading");
     const span = btn.querySelector("span");
     if (span) {
-      span.textContent = btnId === "load-more-opportunities-btn" ? "Load More Internships" : "Load More Jobs";
+      if (btnId === "load-more-opportunities-btn") span.textContent = "Load More Internships";
+      else if (btnId === "load-more-jobs-btn") span.textContent = "Load More Jobs";
+      else if (btnId === "load-more-certs-btn") span.textContent = "Load More Certifications";
     }
 
     if (itemCount === 0) {
@@ -1296,10 +1708,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const triggerSearch = () => {
     opportunitiesPage = 1;
     jobsPage = 1;
+    certsPage = 1;
 
     const query = currentSearch.trim() || currentCategory;
     const opportunitiesContainer = document.getElementById("opportunities-container");
     const jobsTableBody = document.getElementById("jobs-container");
+    const certsContainer = document.getElementById("certifications-container");
     
     if (opportunitiesContainer) {
       opportunitiesContainer.innerHTML = `
@@ -1315,15 +1729,25 @@ document.addEventListener('DOMContentLoaded', () => {
         </tr>
       `;
     }
+    if (certsContainer) {
+      certsContainer.innerHTML = `
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+      `;
+    }
 
     const optBtn = document.getElementById("load-more-opportunities-btn");
     const jobBtn = document.getElementById("load-more-jobs-btn");
+    const certBtn = document.getElementById("load-more-certs-btn");
     if (optBtn) optBtn.style.display = "none";
     if (jobBtn) jobBtn.style.display = "none";
+    if (certBtn) certBtn.style.display = "none";
 
     loadOpportunities(query, currentCountry, 1, false);
     const jobsQuery = currentSearch.trim() || `${currentCategory} job`;
     loadJobs(jobsQuery, currentCountry, 1, false);
+    loadCertifications(currentCertCategory, currentSearch, 1, false);
   };
 
   // Bind Listeners
@@ -1363,6 +1787,32 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // Certification Category Pills Listener
+  const certCategoryPills = document.getElementById("cert-category-pills");
+  if (certCategoryPills) {
+    certCategoryPills.addEventListener("click", (e) => {
+      const pill = e.target.closest(".pill-btn");
+      if (!pill) return;
+
+      certCategoryPills.querySelectorAll(".pill-btn").forEach(btn => btn.classList.remove("active"));
+      pill.classList.add("active");
+
+      currentCertCategory = pill.getAttribute("data-cert-category") || "all";
+      certsPage = 1;
+
+      const certsContainer = document.getElementById("certifications-container");
+      if (certsContainer) {
+        certsContainer.innerHTML = `
+          <div class="skeleton-card"></div>
+          <div class="skeleton-card"></div>
+          <div class="skeleton-card"></div>
+        `;
+      }
+
+      loadCertifications(currentCertCategory, currentSearch, 1, false);
+    });
+  }
+
   // Load More Listeners
   const loadMoreOpportunitiesBtn = document.getElementById("load-more-opportunities-btn");
   if (loadMoreOpportunitiesBtn) {
@@ -1387,6 +1837,18 @@ document.addEventListener('DOMContentLoaded', () => {
       
       const jobsQuery = currentSearch.trim() || `${currentCategory} job`;
       loadJobs(jobsQuery, currentCountry, jobsPage, true);
+    });
+  }
+
+  const loadMoreCertsBtn = document.getElementById("load-more-certs-btn");
+  if (loadMoreCertsBtn) {
+    loadMoreCertsBtn.addEventListener("click", () => {
+      certsPage++;
+      loadMoreCertsBtn.classList.add("loading");
+      const span = loadMoreCertsBtn.querySelector("span");
+      if (span) span.textContent = "Loading...";
+
+      loadCertifications(currentCertCategory, currentSearch, certsPage, true);
     });
   }
 

@@ -58,6 +58,7 @@
           <li><a href="#ambassadors" class="nav-link">Ambassadors</a></li>
           <li><a href="#events" class="nav-link">Events</a></li>
           <li><a href="#jobs" class="nav-link">Jobs</a></li>
+          <li><a href="#certifications" class="nav-link">Certifications</a></li>
           <li><a href="#sudoku" class="nav-link">Play & Win</a></li>
           <li><a href="#follow-us" class="nav-link nav-btn-follow">Follow Us</a></li>
         </ul>
@@ -114,7 +115,7 @@
       <div class="search-filter-panel">
         <div class="search-input-wrapper">
           <i data-lucide="search" class="search-icon"></i>
-          <input type="text" id="search-input" placeholder="Search internships or jobs (e.g. software, designer)..." title="Search Opportunities">
+          <input type="text" id="search-input" placeholder="Search internships, jobs, or certifications (e.g. AWS, Python, Cyber)..." title="Search Opportunities">
         </div>
         
         <div class="filter-controls">
@@ -282,7 +283,40 @@
       </div>
     </section>
 
-    <!-- SECTION 6: PLAY & WIN (Sudoku Game) -->
+    <!-- SECTION 6: CERTIFICATIONS & FREE COURSES -->
+    <section class="portal-section" id="certifications">
+      <div class="section-header">
+        <h2 class="section-title">Certifications & Free Courses</h2>
+        <p class="section-subtitle">Industry-recognized credentials, free skill badges, and professional certifications</p>
+      </div>
+
+      <!-- Category Filter Pills for Certifications -->
+      <div class="category-pills" id="cert-category-pills">
+        <button class="pill-btn active" data-cert-category="all">All Certifications</button>
+        <button class="pill-btn" data-cert-category="free">100% Free</button>
+        <button class="pill-btn" data-cert-category="cloud">Cloud & DevOps</button>
+        <button class="pill-btn" data-cert-category="ai">AI & Data</button>
+        <button class="pill-btn" data-cert-category="cyber">Security</button>
+        <button class="pill-btn" data-cert-category="software">Software Dev</button>
+      </div>
+
+      <!-- Certifications Grid -->
+      <div class="opportunities-grid" id="certifications-container">
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+      </div>
+
+      <!-- Load More Certifications -->
+      <div class="load-more-container">
+        <button id="load-more-certs-btn" class="load-more-btn">
+          <span>Load More Certifications</span>
+          <i data-lucide="chevron-down" class="btn-icon"></i>
+        </button>
+      </div>
+    </section>
+
+    <!-- SECTION 7: PLAY & WIN (Sudoku Game) -->
     <section class="portal-section" id="sudoku">
       <div class="section-header">
         <h2 class="section-title">Take a break — play Sudoku</h2>
